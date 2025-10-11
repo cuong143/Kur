@@ -1,4 +1,4 @@
--- Tải thư viện Rayfield
+-- Rayfield
 local success, Rayfield = pcall(function()
     return loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 end)
@@ -7,17 +7,17 @@ if not success then
     return
 end
 
--- Tạo cửa sổ
+-- Window
 local Window = Rayfield:CreateWindow({
-    Name = "fdsXrin",
-    LoadingTitle = "Đang tải GUI...",
+    Name = "Cuonglor",
+    LoadingTitle = "Loading...",
     LoadingSubtitle = "by cuong",
     ConfigurationSaving = {
         Enabled = false,
     }
 })
 
--- Tạo tab chính
+-- Main
 local Tab = Window:CreateTab("Character")
 
 -- Toggle Infjump
@@ -35,6 +35,499 @@ Tab:CreateToggle({
                     local Humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
                     if Humanoid then
                         Humanoid:ChangeState("Jumping")
+                    end
+                end
+            end)
+        else
+            if JumpConnection then
+                JumpConnection:Disconnect()
+                JumpConnection = nil
+            end
+        end
+    end,
+})
+
+-- Slider Speed
+local WalkSpeedSlider
+WalkSpeedSlider = Tab:CreateSlider({
+    Name = "Speed",
+    Range = {1, 50},
+    Increment = 1,
+    Suffix = "WalkSpeed",
+    CurrentValue = 16,
+    Callback = function(Value)
+        local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = Value
+        end
+    end,
+})
+
+-- Toggle Reset Speed
+Tab:CreateButton({
+    Name = "Reset Speed",
+    Callback = function()
+        local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 16
+        end
+        WalkSpeedSlider:Set(16)
+    end,
+})
+
+-- TpTool 
+Tab:CreateButton({
+    Name = "TpTool",
+    Callback = function()
+        local success, result = pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/TpTool"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải TpTool: " .. tostring(result))
+        end
+    end,
+})
+
+-- Toggle NoClip
+local NoClipEnabled = false
+local NoClipConnection
+
+Tab:CreateToggle({
+    Name = "NoClip",
+    CurrentValue = false,
+    Callback = function(Value)
+        NoClipEnabled = Value
+        if Value then
+            NoClipConnection = game:GetService("RunService").Stepped:Connect(function()
+                local character = game.Players.LocalPlayer.Character
+                if character then
+                    for _, part in pairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.CanCollide then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        else
+            if NoClipConnection then
+                NoClipConnection:Disconnect()
+                NoClipConnection = nil
+            end
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                for _, part in pairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+    end,
+})
+
+-- Tab PvP
+local SupportTab = Window:CreateTab("PVP")
+
+SupportTab:CreateButton({
+    Name = "Aimbot",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/Aim"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải Aimbot: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "aimplayer",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/Aimplayer"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải aimplayer: " .. tostring(result))
+        end
+    end,
+})
+
+-- Tab ESP
+local ESPTab = Window:CreateTab(" ESP")
+
+local ESPEnabled = false
+local ESPConnections = {}
+
+local function removeAllESP()
+    for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+        if player.Character then
+            local char = player.Character
+            if char:FindFirstChild("ESP_Box") then
+                char.ESP_Box:Destroy()
+            end
+            if char:FindFirstChild("Head") and char.Head:FindFirstChild("ESP_Name") then
+                char.Head.ESP_Name:Destroy()
+            end
+        end
+    end
+    for _, conn in pairs(ESPConnections) do
+        conn:Disconnect()
+    end
+    table.clear(ESPConnections)
+end
+
+local function createESP(player)
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local Camera = workspace.CurrentCamera
+    local LocalPlayer = Players.LocalPlayer
+
+    if player == LocalPlayer then return end
+
+    local function updateESP()
+        local char = player.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Head") then return end
+        local hrp = char.HumanoidRootPart
+        local head = char.Head
+
+        if char:FindFirstChild("ESP_Box") then char.ESP_Box:Destroy() end
+        if head:FindFirstChild("ESP_Name") then head.ESP_Name:Destroy() end
+
+        local highlight = Instance.new("Highlight", char)
+        highlight.Name = "ESP_Box"
+        highlight.FillTransparency = 1
+        highlight.OutlineTransparency = 0
+        highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+
+        local billboard = Instance.new("BillboardGui", head)
+        billboard.Name = "ESP_Name"
+        billboard.Adornee = head
+        billboard.AlwaysOnTop = true
+        billboard.Size = UDim2.new(5, 0, 1, 0)
+        billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+
+        local label = Instance.new("TextLabel", billboard)
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.TextColor3 = Color3.fromRGB(255, 0, 0)
+        label.TextStrokeTransparency = 0.5
+        label.Text = player.Name
+        label.Font = Enum.Font.SourceSansBold
+        label.TextScaled = true
+
+        local conn = RunService.RenderStepped:Connect(function()
+            if player and player.Character and player.Character:FindFirstChild("Head") then
+                local dist = (Camera.CFrame.Position - hrp.Position).Magnitude
+                billboard.Size = UDim2.new(math.clamp(10 / dist, 1, 5), 0, math.clamp(2 / dist, 0.5, 2), 0)
+            end
+        end)
+        table.insert(ESPConnections, conn)
+    end
+
+    local conn = player.CharacterAdded:Connect(function()
+        task.wait(1)
+        updateESP()
+    end)
+    table.insert(ESPConnections, conn)
+
+    if player.Character then
+        updateESP()
+    end
+end
+
+ESPTab:CreateToggle({
+    Name = "espplayer",
+    CurrentValue = false,
+    Callback = function(Value)
+        ESPEnabled = Value
+        if Value then
+            for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+                createESP(p)
+            end
+            local conn = game:GetService("Players").PlayerAdded:Connect(function(p)
+                createESP(p)
+            end)
+            table.insert(ESPConnections, conn)
+        else
+            removeAllESP()
+        end
+    end,
+})
+
+ESPTab:CreateButton({
+    Name = "ESP Monster",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/Espmonter"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải ESP Monster: " .. tostring(result))
+        end
+    end,
+})
+
+local MainTab = Window:CreateTab("Fly")
+
+-- Vars
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local flying = false
+local speeds = 1              -- số luồng translate / cũng là cơ bản cho tốc độ
+local speedValue = 1          -- tốc độ dùng cho BV
+local tpwalking = false
+local nowe = false
+
+local ascendToggle = false    -- toggle UI
+local descendToggle = false
+local ascendHold = false      -- giữ phím (E)
+local descendHold = false     -- giữ phím (Q)
+
+local flyBG, flyBV, flyRenderConn
+
+-- Helper: trạng thái ascend thực sự
+local function isAscending()
+	return ascendToggle or ascendHold
+end
+local function isDescending()
+	return descendToggle or descendHold
+end
+
+-- Start/Stop translate threads (giữ nguyên logic gốc)
+local function startTranslateThreads()
+	tpwalking = true
+	for i = 1, speeds do
+		task.spawn(function()
+			local hb = RunService.Heartbeat
+			local char = LocalPlayer.Character
+			local hum = char and char:FindFirstChildWhichIsA("Humanoid")
+			while tpwalking and hb:Wait() and char and hum and hum.Parent do
+				if hum.MoveDirection.Magnitude > 0 then
+					-- dịch chuyển dựa trên MoveDirection (hài hòa với camera)
+					char:TranslateBy(hum.MoveDirection)
+				end
+			end
+		end)
+	end
+end
+
+local function stopTranslateThreads()
+	tpwalking = false
+end
+
+--Fly
+local function enableFly()
+	local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if not hum then return end
+
+	nowe = true
+	-- start translate threads
+	startTranslateThreads()
+
+	-- disable animate + freeze play speed
+	if char:FindFirstChild("Animate") then
+		char.Animate.Disabled = true
+	end
+	local Hum = char:FindFirstChildOfClass("Humanoid") or char:FindFirstChildOfClass("AnimationController")
+	if Hum then
+		for _, v in next, Hum:GetPlayingAnimationTracks() do
+			v:AdjustSpeed(0)
+		end
+	end
+
+	-- disable 
+	local disableStates = {
+		Enum.HumanoidStateType.Climbing,
+		Enum.HumanoidStateType.FallingDown,
+		Enum.HumanoidStateType.Flying,
+		Enum.HumanoidStateType.Freefall,
+		Enum.HumanoidStateType.GettingUp,
+		Enum.HumanoidStateType.Jumping,
+		Enum.HumanoidStateType.Landed,
+		Enum.HumanoidStateType.Physics,
+		Enum.HumanoidStateType.PlatformStanding,
+		Enum.HumanoidStateType.Ragdoll,
+		Enum.HumanoidStateType.Running,
+		Enum.HumanoidStateType.RunningNoPhysics,
+		Enum.HumanoidStateType.Seated,
+		Enum.HumanoidStateType.StrafingNoPhysics,
+		Enum.HumanoidStateType.Swimming
+	}
+	for _, st in ipairs(disableStates) do
+		pcall(function() hum:SetStateEnabled(st, false) end)
+	end
+	pcall(function() hum:ChangeState(Enum.HumanoidStateType.Swimming) end)
+
+	local jointPart
+	if hum.RigType == Enum.HumanoidRigType.R6 then
+		jointPart = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("HumanoidRootPart")
+	else
+		jointPart = char:FindFirstChild("UpperTorso") or char:FindFirstChild("HumanoidRootPart")
+	end
+	if not jointPart then jointPart = char:FindFirstChildWhichIsA("BasePart") end
+
+	flyBG = Instance.new("BodyGyro")
+	flyBG.P = 9e4
+	flyBG.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+	flyBG.CFrame = jointPart.CFrame
+	flyBG.Parent = jointPart
+
+	flyBV = Instance.new("BodyVelocity")
+	flyBV.Velocity = Vector3.new(0, 0.1, 0)
+	flyBV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+	flyBV.Parent = jointPart
+
+	--
+	flyRenderConn = RunService.RenderStepped:Connect(function()
+		if not nowe then return end
+		local cam = workspace.CurrentCamera
+		local moveDir = hum.MoveDirection or Vector3.new(0,0,0)
+		local mov = Vector3.new(0,0,0)
+		if moveDir.Magnitude > 0 then
+			--  camera: forward/back + right/left
+			mov = (cam.CFrame.LookVector * moveDir.Z + cam.CFrame.RightVector * moveDir.X) * speedValue
+		end
+
+		-- vertical velocity to toggle
+		local vert = 0
+		if isAscending() then vert = speedValue end
+		if isDescending() then vert = -speedValue end
+
+		-- set velocity
+		if flyBV and flyBV.Parent then
+			flyBV.Velocity = mov + Vector3.new(0, vert, 0)
+		end
+
+		--  orientation 
+		if flyBG and flyBG.Parent then
+			flyBG.CFrame = cam.CFrame * CFrame.Angles(-math.rad((moveDir.Z) * 50 * (speedValue/50)), 0, 0)
+		end
+	end)
+end
+
+-- off fly
+local function disableFly()
+	nowe = false
+	stopTranslateThreads()
+
+	-- disconnect render + destroy BV/BG
+	if flyRenderConn then
+		flyRenderConn:Disconnect()
+		flyRenderConn = nil
+	end
+	if flyBG then
+		pcall(function() flyBG:Destroy() end)
+		flyBG = nil
+	end
+	if flyBV then
+		pcall(function() flyBV:Destroy() end)
+		flyBV = nil
+	end
+
+	local char = LocalPlayer.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if hum then
+		for _, st in ipairs(Enum.HumanoidStateType:GetEnumItems()) do
+			pcall(function() hum:SetStateEnabled(st, true) end)
+		end
+		pcall(function() hum:ChangeState(Enum.HumanoidStateType.RunningNoPhysics) end)
+	end
+
+	-- enable animate
+	if char and char:FindFirstChild("Animate") then
+		char.Animate.Disabled = false
+	end
+end
+
+-- UI: Toggle Fly
+MainTab:CreateToggle({
+	Name = "Fly",
+	CurrentValue = false,
+	Flag = "FlyToggle",
+	Callback = function(Value)
+		flying = Value
+		if Value then
+			enableFly()
+		else
+			disableFly()
+		end
+	end,
+})
+
+-- UI: Slider tốc độ
+MainTab:CreateSlider({
+	Name = "Speed  *note:When adjusting the speed, restart the flight to avoid errors.  ",
+	Range = {1, 20},
+	Increment = 1,
+	CurrentValue = speedValue,
+	Flag = "FlySpeed",
+	Callback = function(Value)
+		speedValue = Value
+		speeds = math.max(1, math.floor(Value)) -- giữ gần giống GUI gốc: số luồng = speeds
+		if nowe then
+			stopTranslateThreads()
+			startTranslateThreads()
+		end
+	end,
+})
+
+-- UI: Toggle Ascend / Descend
+MainTab:CreateToggle({
+	Name = "Up",
+	CurrentValue = false,
+	Flag = "AscendToggle",
+	Callback = function(Value)
+		ascendToggle = Value
+	end,
+})
+MainTab:CreateToggle({
+	Name = "Down",
+	CurrentValue = false,
+	Flag = "DescendToggle",
+	Callback = function(Value)
+		descendToggle = Value
+	end,
+})
+
+-- Keybind: giữ E để lên, giữ Q để xuống (như behavior "press and hold")
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.E then
+			ascendHold = true
+		elseif input.KeyCode == Enum.KeyCode.Q then
+			descendHold = true
+		end
+	end
+end)
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.E then
+			ascendHold = false
+		elseif input.KeyCode == Enum.KeyCode.Q then
+			descendHold = false
+		end
+	end
+end)
+
+-- Reset on respawn
+Players.LocalPlayer.CharacterAdded:Connect(function(char)
+	-- đảm bảo tắt lại nếu die / respawn
+	nowe = false
+	tpwalking = false
+	if flyRenderConn then
+		flyRenderConn:Disconnect()
+		flyRenderConn = nil
+	end
+	if flyBG then pcall(function() flyBG:Destroy() end) flyBG = nil end
+	if flyBV then pcall(function() flyBV:Destroy() end) flyBV = nil end
+	-- enable animate nếu bị tắt
+	if char:FindFirstChild("Animate") then
+		char.Animate.Disabled = false
+	end
+end)                        Humanoid:ChangeState("Jumping")
                     end
                 end
             end)
