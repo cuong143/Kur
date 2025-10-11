@@ -1,0 +1,22 @@
+Tab:CreateToggle({
+    Name = "Infjump",
+    CurrentValue = false,
+    Callback = function(Value)
+        InfJumpEnabled = Value
+        if Value then
+            JumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+                if InfJumpEnabled and game.Players.LocalPlayer.Character then
+                    local Humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                    if Humanoid then
+                        Humanoid:ChangeState("Jumping")
+                    end
+                end
+            end)
+        else
+            if JumpConnection then
+                JumpConnection:Disconnect()
+                JumpConnection = nil
+            end
+        end
+    end,
+})
