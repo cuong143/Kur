@@ -1,5 +1,0 @@
-for _, v in pairs(game:GetDescendants()) do
-    if v:IsA("TextLabel") and v.Text:find("Made By Veux") then
-        v.Visible = false
-    end
-end
