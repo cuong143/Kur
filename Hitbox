@@ -13,7 +13,7 @@ local Window = Rayfield:CreateWindow({
 local Tab = Window:CreateTab("Hitbox", 4483362458)
 
 -- Settings
-_G.HitboxSize = 80
+_G.HitboxSize = 500
 _G.HitboxEnabled = false
 
 -- Hitbox function
