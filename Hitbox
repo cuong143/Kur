@@ -51,7 +51,7 @@ Tab:CreateToggle({
 -- Slider  size
 Tab:CreateSlider({
     Name = "Destiny",
-    Range = {5,150},
+    Range = {5,500},
     Increment = 5,
     CurrentValue = 80,
     Callback = function(Value)
