@@ -1,0 +1,60 @@
+-- Rayfield UI
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Hitbox Controller",
+    LoadingTitle = "Hitbox GUI",
+    LoadingSubtitle = "Rayfield",
+    ConfigurationSaving = {
+        Enabled = false
+    }
+})
+
+local Tab = Window:CreateTab("Hitbox", 4483362458)
+
+-- Settings
+_G.HitboxSize = 80
+_G.HitboxEnabled = false
+
+-- Hitbox function
+local function expandHitbox()
+    while _G.HitboxEnabled do
+        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Character then
+                pcall(function()
+                    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        hrp.Size = Vector3.new(_G.HitboxSize,_G.HitboxSize,_G.HitboxSize)
+                        hrp.Transparency = 0.5
+                        hrp.Material = Enum.Material.Neon
+                        hrp.CanCollide = false
+                    end
+                end)
+            end
+        end
+        task.wait(0.1)
+    end
+end
+
+-- Toggle 
+Tab:CreateToggle({
+    Name = "Bin Ngu",
+    CurrentValue = false,
+    Callback = function(Value)
+        _G.HitboxEnabled = Value
+        if Value then
+            task.spawn(expandHitbox)
+        end
+    end
+})
+
+-- Slider  size
+Tab:CreateSlider({
+    Name = "Destiny",
+    Range = {5,150},
+    Increment = 5,
+    CurrentValue = 80,
+    Callback = function(Value)
+        _G.HitboxSize = Value
+    end
+})
