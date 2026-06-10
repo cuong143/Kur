@@ -28,9 +28,9 @@ task.spawn(expandHitbox)
 -- Slider size
 Tab:CreateSlider({
     Name = "Destiny",
-    Range = {5,500},
+    Range = {0,400},
     Increment = 5,
-    CurrentValue = 80,
+    CurrentValue = 40,
     Callback = function(Value)
         _G.HitboxSize = Value
     end
