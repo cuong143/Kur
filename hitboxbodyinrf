@@ -2,11 +2,10 @@ local Tab = _G.Window:CreateTab("Hitbox", 4483362458)
 
 -- Settings
 _G.HitboxSize = 500
-_G.HitboxEnabled = false
 
 -- Hitbox function
 local function expandHitbox()
-    while _G.HitboxEnabled do
+    while true do
         for _, player in pairs(game:GetService("Players"):GetPlayers()) do
             if player ~= game.Players.LocalPlayer and player.Character then
                 pcall(function()
@@ -24,19 +23,9 @@ local function expandHitbox()
     end
 end
 
--- Toggle 
-Tab:CreateToggle({
-    Name = "Bin Ngu",
-    CurrentValue = false,
-    Callback = function(Value)
-        _G.HitboxEnabled = Value
-        if Value then
-            task.spawn(expandHitbox)
-        end
-    end
-})
+task.spawn(expandHitbox)
 
--- Slider  size
+-- Slider size
 Tab:CreateSlider({
     Name = "Destiny",
     Range = {5,500},
