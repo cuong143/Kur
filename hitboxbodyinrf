@@ -30,8 +30,102 @@ Tab:CreateSlider({
     Name = "Destiny",
     Range = {0,400},
     Increment = 5,
-    CurrentValue = 40,
+    CurrentValue = 400,
     Callback = function(Value)
         _G.HitboxSize = Value
+    end
+})
+
+
+
+
+local player = game.Players.LocalPlayer
+local servicePlayer = game:GetService("Players")
+
+
+local bodyParts = {
+    "Head"
+}
+
+local hitboxSizes = {}
+local originalSizes = {}
+for _, partName in ipairs(bodyParts) do
+    hitboxSizes[partName] = 0
+end
+
+local function ResizeBodyPart(targetPlayer, partName, size)
+    if targetPlayer == player then return end
+
+    local character = targetPlayer.Character
+    if not character then return end
+
+    local part = character:FindFirstChild(partName)
+    if not part then return end
+
+    if not originalSizes[part] then
+        originalSizes[part] = part.Size
+    end
+
+    local minSize = 0.1
+    local newSize = math.max(size, minSize)
+
+    part.Size = Vector3.new(newSize, newSize, newSize)
+    part.Transparency = 0.4
+    part.CanCollide = false
+    part.Massless = true
+    part.Anchored = false
+
+    if size <= 0 then
+        part.Size = originalSizes[part]
+    end
+end
+
+local function updateOtherPlayers()
+    for _, otherPlayer in ipairs(servicePlayer:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer.Character then
+            for partName, size in pairs(hitboxSizes) do
+                ResizeBodyPart(otherPlayer, partName, size)
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        updateOtherPlayers()
+        task.wait(0.1)
+    end
+end)
+
+
+-- =====================
+-- Player handling
+-- =====================
+servicePlayer.PlayerAdded:Connect(function(newPlayer)
+    if newPlayer ~= player then
+        newPlayer.CharacterAdded:Connect(function()
+            for partName, size in pairs(hitboxSizes) do
+                ResizeBodyPart(newPlayer, partName, size)
+            end
+        end)
+    end
+end)
+
+for _, otherPlayer in ipairs(servicePlayer:GetPlayers()) do
+    if otherPlayer ~= player and otherPlayer.Character then
+        for partName, size in pairs(hitboxSizes) do
+            ResizeBodyPart(otherPlayer, partName, size)
+        end
+    end
+end
+
+
+Tab:CreateSlider({
+    Name = "Head Size",
+    Range = {0,100},
+    Increment = 0.5,
+    CurrentValue = 0,
+    Callback = function(value)
+        hitboxSizes["Head"] = value
     end
 })
