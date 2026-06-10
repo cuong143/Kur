@@ -1,4 +1,4 @@
-local Tab = Window:CreateTab("Hitbox", 4483362458)
+local Tab = _G.Window:CreateTab("Hitbox", 4483362458)
 
 -- Settings
 _G.HitboxSize = 500
