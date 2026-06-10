@@ -1,7 +1,7 @@
 local Tab = _G.Window:CreateTab("Hitbox", 4483362458)
 
 -- Settings
-_G.HitboxSize = 500
+_G.HitboxSize = 400
 
 -- Hitbox function
 local function expandHitbox()
