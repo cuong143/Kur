@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/in%20hitbox"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/hitboxbh"))()
