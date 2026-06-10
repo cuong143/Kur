@@ -27,7 +27,7 @@ task.spawn(expandHitbox)
 
 -- Slider size
 Tab:CreateSlider({
-    Name = "Destiny",
+    Name = "Body size",
     Range = {0,400},
     Increment = 5,
     CurrentValue = 400,
