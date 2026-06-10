@@ -12,4 +12,4 @@ local Window = Rayfield:CreateWindow({
 
 _G.Window = Window
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/test"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/hitboxbodyinrf"))()
