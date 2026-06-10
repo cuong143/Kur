@@ -1,0 +1,15 @@
+-- Rayfield UI
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Hitbox Controller",
+    LoadingTitle = "Hitbox GUI",
+    LoadingSubtitle = "Rayfield",
+    ConfigurationSaving = {
+        Enabled = false
+    }
+})
+
+_G.Window = Window
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/test"))()
