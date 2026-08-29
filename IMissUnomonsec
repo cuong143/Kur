@@ -10,7 +10,7 @@ end
 -- Window
 local Window = Rayfield:CreateWindow({
     Name = "Cuonglor",
-    LoadingTitle = "Loading...",
+    LoadingTitle = "BinNgu",
     LoadingSubtitle = "by cuong",
     ConfigurationSaving = {
         Enabled = false,
@@ -51,7 +51,7 @@ Tab:CreateToggle({
 local WalkSpeedSlider
 WalkSpeedSlider = Tab:CreateSlider({
     Name = "Speed",
-    Range = {1, 50},
+    Range = {1, 200},
     Increment = 1,
     Suffix = "WalkSpeed",
     CurrentValue = 16,
