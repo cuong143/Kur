@@ -175,6 +175,18 @@ SupportTab:CreateButton({
     end,
 })
 
+SupportTab:CreateButton({
+    Name = "AntiFling",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/antifling"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải AntiFling: " .. tostring(result))
+        end
+    end,
+})
+
 -- Tab ESP
 local ESPTab = Window:CreateTab(" ESP")
 
