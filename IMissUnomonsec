@@ -10,7 +10,7 @@ end
 -- Window
 local Window = Rayfield:CreateWindow({
     Name = "Cuonglor",
-    LoadingTitle = "BinNgu",
+    LoadingTitle = "WonHee",
     LoadingSubtitle = "by cuong",
     ConfigurationSaving = {
         Enabled = false,
