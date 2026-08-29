@@ -1,0 +1,808 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local SoundService = game:GetService("SoundService")
+local Debris = game:GetService("Debris")
+local VirtualUser = game:GetService("VirtualUser")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+local Mouse = LocalPlayer:GetMouse()
+
+-- ================= GUI KORUMASI VE TEMİZLİK =================
+local CoreGui
+local success, result = pcall(function() return game:GetService("CoreGui") end)
+if success and result then CoreGui = result else CoreGui = LocalPlayer:WaitForChild("PlayerGui") end
+
+for _, v in pairs(CoreGui:GetChildren()) do
+    if v.Name == "HileciBestoUI" then v:Destroy() end
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "HileciBestoUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- ================= AYARLAR (CONFIG) =================
+local Config = {
+    Movement = {
+        WalkSpeed = 16,
+        JumpPower = 50,
+        Noclip = false,
+        InfJump = false,
+        ClickTP = false,
+        NoRagdoll = false
+    },
+    Combat = {
+        Aimlock = false,
+        AimPart = "Head",
+        AimDistance = 150,
+        HeadHitbox = false,
+        HitboxSize = 8
+    },
+    Visuals = {
+        Fullbright = false,
+        PlayerESP = false,
+        EntityESP = false,
+        ItemESP = false,
+        ExitESP = false,
+        ButtonESP = false,
+        Tracers = false
+    },
+    Utility = {
+        GodMode = false,
+        AntiAFK = false,
+        AutoInteract = false,
+        ZoomBypass = false
+    }
+}
+
+-- ================= SES EFEKTLERİ =================
+local Sounds = {
+    Hover = 8996611388,
+    ClickOn = 6895079853,
+    ClickOff = 6895079853,
+    Intro = 6042053626,
+    Success = 8141349377
+}
+
+local function PlaySound(id, volume, pitch)
+    task.spawn(function()
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://" .. tostring(id)
+        sound.Volume = volume or 0.3
+        sound.PlaybackSpeed = pitch or 1
+        sound.Parent = SoundService
+        sound:Play()
+        Debris:AddItem(sound, 2)
+    end)
+end
+
+-- ================= ZAYIF TABLOLAR (WEAK TABLES) =================
+local Cache = {
+    Entities = setmetatable({}, {__mode = "v"}),
+    Exits = setmetatable({}, {__mode = "v"}),
+    Buttons = setmetatable({}, {__mode = "v"}),
+    Items = setmetatable({}, {__mode = "v"}),
+    Prompts = setmetatable({}, {__mode = "v"})
+}
+
+local espCache = setmetatable({}, {__mode = "k"})
+local tracerCache = setmetatable({}, {__mode = "k"})
+local hitboxCache = setmetatable({}, {__mode = "k"})
+
+local function GetCharacter()
+    return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+end
+local function GetHumanoid()
+    return GetCharacter():FindFirstChildOfClass("Humanoid")
+end
+local function GetRootPart()
+    return GetCharacter():FindFirstChild("HumanoidRootPart")
+end
+
+-- ================= GELİŞMİŞ CANAVAR ALGILAMA =================
+local MonsterKeywords = {
+    "monster", "enemy", "killer", "zombie", "bot", "nextbot", "boss", "guard",
+    "entity", "slender", "scp", "rush", "ambush", "figure", "seek", "screech",
+    "halt", "eyes", "glitch", "timothy", "jack", "hide", "piggy", "granny",
+    "smiler", "partygoer", "bacteria", "hunter", "imposter"
+}
+
+local function IsRealEntity(obj)
+    if not obj or not obj:IsA("Model") or obj == GetCharacter() then return false end
+    local isPlayer = Players:GetPlayerFromCharacter(obj)
+    if isPlayer then
+        if isPlayer == LocalPlayer then return false end
+        if isPlayer.Team then
+            local tName = isPlayer.Team.Name:lower()
+            if tName:find("killer") or tName:find("monster") or tName:find("beast") or tName:find("infected") or tName:find("piggy") then
+                return true
+            end
+        end
+        if obj:HasTag("Monster") or obj:HasTag("Killer") then return true end
+        return false
+    end
+
+    local name = obj.Name:lower()
+    if name:find("shop") or name:find("statue") or name:find("display") or name:find("dummy") or name:find("pet") then
+        return false
+    end
+
+    if obj:HasTag("Entity") or obj:HasTag("Monster") or obj:HasTag("Enemy") or obj:HasTag("Killer") then
+        return true
+    end
+
+    for _, keyword in ipairs(MonsterKeywords) do
+        if name:find(keyword) then return true end
+    end
+
+    local hum = obj:FindFirstChildOfClass("Humanoid")
+    local root = obj:FindFirstChild("HumanoidRootPart")
+    if hum and root then return true end
+
+    if obj:FindFirstChild("Hitbox") or (obj:FindFirstChild("Head") and not hum) then
+        return true
+    end
+
+    return false
+end
+
+-- ================= THROTTLE JITTER (OBJE TARAYICI) =================
+task.spawn(function()
+    while task.wait(3) do
+        table.clear(Cache.Entities)
+        table.clear(Cache.Exits)
+        table.clear(Cache.Buttons)
+        table.clear(Cache.Items)
+        table.clear(Cache.Prompts)
+
+        local descendants = Workspace:GetDescendants()
+        for i, obj in ipairs(descendants) do
+            if i % 150 == 0 then
+                task.wait(0.01 + (math.random() * 0.02))
+            end
+            if obj:IsA("ProximityPrompt") then
+                table.insert(Cache.Prompts, obj)
+            end
+            local name = obj.Name:lower()
+            if IsRealEntity(obj) then
+                table.insert(Cache.Entities, obj)
+            end
+            if name:find("exit") or name:find("door") then
+                table.insert(Cache.Exits, obj)
+            end
+            if name:find("button") or name:find("lever") or name:find("switch") then
+                table.insert(Cache.Buttons, obj)
+            end
+            if name:find("item") or name:find("key") or obj:IsA("Tool") then
+                table.insert(Cache.Items, obj)
+            end
+        end
+    end
+end)
+
+-- ================= KARAKTER KORUMA SİSTEMİ =================
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+    local hum = newChar:WaitForChild("Humanoid", 5)
+    if hum then
+        hum.WalkSpeed = Config.Movement.WalkSpeed
+        hum.JumpPower = Config.Movement.JumpPower
+    end
+end)
+
+-- ================= ESP MONTONU =================
+local function CreateHighlight(target, color, text)
+    if not target or not target.Parent then return end
+    if espCache[target] then
+        espCache[target][2].TextLabel.Text = text
+        return
+    end
+    local hl = Instance.new("Highlight", target)
+    hl.FillColor = color
+    hl.FillTransparency = 0.6
+    hl.OutlineColor = color
+    hl.OutlineTransparency = 0.1
+    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+
+    local bb = Instance.new("BillboardGui", target)
+    bb.Size = UDim2.new(0, 150, 0, 30)
+    bb.AlwaysOnTop = true
+    bb.Adornee = target:FindFirstChildWhichIsA("BasePart") or target
+
+    local lbl = Instance.new("TextLabel", bb)
+    lbl.Size = UDim2.new(1, 0, 1, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = color
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextStrokeTransparency = 0
+
+    espCache[target] = {hl, bb}
+end
+
+local function DrawTracer(target, color)
+    if not target or not target.Parent or tracerCache[target] then return end
+    local line = Drawing.new("Line")
+    line.Color = color
+    line.Thickness = 1.5
+    line.Transparency = 0.7
+    line.Visible = false
+    tracerCache[target] = line
+end
+
+local function ClearVisuals()
+    for _, v in pairs(espCache) do
+        pcall(function()
+            v[1]:Destroy()
+            v[2]:Destroy()
+        end)
+    end
+    for _, line in pairs(tracerCache) do
+        pcall(function() line:Remove() end)
+    end
+    table.clear(espCache)
+    table.clear(tracerCache)
+end
+
+-- ================= HITBOX SİSTEMİ (DÜZELTİLMİŞ) =================
+-- Gerçek Head parçasına dokunmaz -> canavarlar donmaz.
+local function ApplyHitbox(obj)
+    if obj == nil then return end
+    local head = obj:FindFirstChild("Head")
+    if not head or not head:IsA("BasePart") then return end
+
+    local existing = hitboxCache[obj]
+    if existing and existing.Parent then
+        -- Sadece boyutu güncelle
+        existing.Size = Vector3.new(
+            Config.Combat.HitboxSize,
+            Config.Combat.HitboxSize,
+            Config.Combat.HitboxSize
+        )
+        return
+    end
+
+    -- Ayrı hitbox parçası oluştur (gerçek Head'e dokunma!)
+    local hb = Instance.new("Part")
+    hb.Name = "HitboxExpand"
+    hb.Size = Vector3.new(
+        Config.Combat.HitboxSize,
+        Config.Combat.HitboxSize,
+        Config.Combat.HitboxSize
+    )
+    hb.Transparency = 0.5
+    hb.CanCollide = false
+    hb.CanQuery = true
+    hb.Massless = true
+    hb.Anchored = false
+    hb.CFrame = head.CFrame
+    hb.Color = Color3.fromRGB(255, 80, 80)
+    hb.Parent = obj
+
+    -- Head'e kaynakla -> hareketi bozmaz, Head'i takip eder
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = head
+    weld.Part1 = hb
+    weld.Parent = hb
+
+    hitboxCache[obj] = hb
+end
+
+local function ClearHitboxes()
+    for obj, hb in pairs(hitboxCache) do
+        pcall(function() hb:Destroy() end)
+    end
+    table.clear(hitboxCache)
+end
+
+-- ================= INTRO SİSTEMİ =================
+task.wait(1)
+local IntroFrame = Instance.new("Frame", ScreenGui)
+IntroFrame.Size = UDim2.new(1, 0, 1, 0)
+IntroFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 15)
+IntroFrame.ZIndex = 999
+IntroFrame.BackgroundTransparency = 1
+
+local IntroText = Instance.new("TextLabel", IntroFrame)
+IntroText.Text = "HileciBesto"
+IntroText.Font = Enum.Font.GothamBlack
+IntroText.TextSize = 60
+IntroText.TextColor3 = Color3.fromRGB(150, 100, 255)
+IntroText.AnchorPoint = Vector2.new(0.5, 0.5)
+IntroText.Position = UDim2.new(0.5, 0, 0.45, 0)
+IntroText.BackgroundTransparency = 1
+IntroText.ZIndex = 1000
+IntroText.TextTransparency = 1
+
+local LoadText = Instance.new("TextLabel", IntroFrame)
+LoadText.Text = "Loading script"
+LoadText.Font = Enum.Font.GothamSemibold
+LoadText.TextSize = 18
+LoadText.TextColor3 = Color3.fromRGB(200, 200, 200)
+LoadText.AnchorPoint = Vector2.new(0.5, 0.5)
+LoadText.Position = UDim2.new(0.5, 0, 0.55, 0)
+LoadText.BackgroundTransparency = 1
+LoadText.ZIndex = 1000
+LoadText.TextTransparency = 1
+
+PlaySound(Sounds.Intro, 0.5, 1)
+
+local TweenIn = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+TweenService:Create(IntroFrame, TweenIn, {BackgroundTransparency = 0}):Play()
+TweenService:Create(IntroText, TweenIn, {TextTransparency = 0, Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
+TweenService:Create(LoadText, TweenIn, {TextTransparency = 0, Position = UDim2.new(0.5, 0, 0.55, 0)}):Play()
+
+local dots = 0
+local introActive = true
+task.spawn(function()
+    while introActive do
+        dots = (dots + 1) % 4
+        LoadText.Text = "Loading script" .. string.rep(".", dots)
+        task.wait(0.3)
+    end
+end)
+
+task.wait(1.5)
+introActive = false
+LoadText.Text = "Successfully Loaded!"
+LoadText.TextColor3 = Color3.fromRGB(100, 255, 100)
+PlaySound(Sounds.Success, 0.4, 1)
+
+task.wait(0.5)
+local TweenOut = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+TweenService:Create(IntroFrame, TweenOut, {BackgroundTransparency = 1}):Play()
+TweenService:Create(IntroText, TweenOut, {TextTransparency = 1, Position = UDim2.new(0.5, 0, 0.45, 0)}):Play()
+TweenService:Create(LoadText, TweenOut, {TextTransparency = 1}):Play()
+task.wait(0.5)
+IntroFrame:Destroy()
+
+-- ================= SEKMELİ ARAYÜZ (TAB UI) =================
+local ToggleBtn = Instance.new("TextButton", ScreenGui)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+ToggleBtn.Position = UDim2.new(0.5, -75, 0, -50)
+ToggleBtn.Size = UDim2.new(0, 150, 0, 42)
+ToggleBtn.Font = Enum.Font.GothamBlack
+ToggleBtn.Text = "HileciBesto"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextSize = 16
+ToggleBtn.Active = true
+ToggleBtn.Draggable = true
+ToggleBtn.ZIndex = 100
+
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0, 10)
+Instance.new("UIStroke", ToggleBtn).Color = Color3.fromRGB(150, 100, 255)
+Instance.new("UIStroke", ToggleBtn).Thickness = 2
+
+TweenService:Create(ToggleBtn, TweenInfo.new(1, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -75, 0, 15)}):Play()
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+MainFrame.Visible = false
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.ZIndex = 90
+MainFrame.ClipsDescendants = true
+
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(150, 100, 255)
+
+local TabContainer = Instance.new("Frame", MainFrame)
+TabContainer.Size = UDim2.new(1, -20, 0, 35)
+TabContainer.Position = UDim2.new(0, 10, 0, 10)
+TabContainer.BackgroundTransparency = 1
+
+local TabListLayout = Instance.new("UIListLayout", TabContainer)
+TabListLayout.FillDirection = Enum.FillDirection.Horizontal
+TabListLayout.Padding = UDim.new(0, 5)
+
+local Tabs = {}
+
+local function CreateTab(name)
+    local TBtn = Instance.new("TextButton", TabContainer)
+    TBtn.Size = UDim2.new(0, 78, 1, 0)
+    TBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+    TBtn.Text = name
+    TBtn.TextColor3 = Color3.new(0.6, 0.6, 0.6)
+    TBtn.Font = Enum.Font.GothamBold
+    TBtn.TextSize = 12
+    Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 6)
+
+    local Scroll = Instance.new("ScrollingFrame", MainFrame)
+    Scroll.Size = UDim2.new(1, -20, 1, -65)
+    Scroll.Position = UDim2.new(0, 10, 0, 55)
+    Scroll.BackgroundTransparency = 1
+    Scroll.BorderSizePixel = 0
+    Scroll.ScrollBarThickness = 3
+    Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Scroll.Visible = false
+
+    local SLayout = Instance.new("UIListLayout", Scroll)
+    SLayout.Padding = UDim.new(0, 8)
+    SLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+    TBtn.MouseButton1Click:Connect(function()
+        PlaySound(Sounds.ClickOn, 0.2, 1.3)
+        for _, tab in pairs(Tabs) do
+            tab.Scroll.Visible = false
+            TweenService:Create(tab.Btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 38), TextColor3 = Color3.new(0.6, 0.6, 0.6)}):Play()
+        end
+        Scroll.Visible = true
+        TweenService:Create(TBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(150, 100, 255), TextColor3 = Color3.new(1, 1, 1)}):Play()
+    end)
+
+    table.insert(Tabs, {Btn = TBtn, Scroll = Scroll})
+
+    if #Tabs == 1 then
+        TBtn.BackgroundColor3 = Color3.fromRGB(150, 100, 255)
+        TBtn.TextColor3 = Color3.new(1, 1, 1)
+        Scroll.Visible = true
+    end
+
+    return Scroll
+end
+
+local function CreateToggle(parent, name, cfgTable, cfgKey)
+    local F = Instance.new("Frame", parent)
+    F.Size = UDim2.new(1, -10, 0, 40)
+    F.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+    Instance.new("UICorner", F).CornerRadius = UDim.new(0, 6)
+
+    local L = Instance.new("TextLabel", F)
+    L.Size = UDim2.new(1, -60, 1, 0)
+    L.Position = UDim2.new(0, 10, 0, 0)
+    L.BackgroundTransparency = 1
+    L.Text = name
+    L.TextColor3 = Color3.new(1, 1, 1)
+    L.Font = Enum.Font.GothamSemibold
+    L.TextSize = 13
+    L.TextXAlignment = Enum.TextXAlignment.Left
+
+    local B = Instance.new("TextButton", F)
+    B.Size = UDim2.new(0, 44, 0, 22)
+    B.Position = UDim2.new(1, -54, 0.5, -11)
+    B.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    B.Text = ""
+    Instance.new("UICorner", B).CornerRadius = UDim.new(1, 0)
+
+    local C = Instance.new("Frame", B)
+    C.Size = UDim2.new(0, 18, 0, 18)
+    C.Position = UDim2.new(0, 2, 0, 2)
+    C.BackgroundColor3 = Color3.new(1, 1, 1)
+    Instance.new("UICorner", C).CornerRadius = UDim.new(1, 0)
+
+    B.MouseEnter:Connect(function() PlaySound(Sounds.Hover, 0.1, 1.2) end)
+
+    B.MouseButton1Click:Connect(function()
+        cfgTable[cfgKey] = not cfgTable[cfgKey]
+        local state = cfgTable[cfgKey]
+        PlaySound(state and Sounds.ClickOn or Sounds.ClickOff, 0.3, state and 1.2 or 0.9)
+
+        TweenService:Create(B, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = state and Color3.fromRGB(150, 100, 255) or Color3.fromRGB(45, 45, 55)}):Play()
+        TweenService:Create(C, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = state and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)}):Play()
+
+        if not state and (name:match("ESP") or name:match("Tracers")) then
+            ClearVisuals()
+        end
+        -- Hitbox kapatıldığında hitbox'ları temizle
+        if not state and name == "Expand Head Hitbox" then
+            ClearHitboxes()
+        end
+    end)
+end
+
+local function CreateSlider(parent, name, cfgTable, cfgKey, min, max, step)
+    local F = Instance.new("Frame", parent)
+    F.Size = UDim2.new(1, -10, 0, 45)
+    F.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+    Instance.new("UICorner", F).CornerRadius = UDim.new(0, 6)
+
+    local L = Instance.new("TextLabel", F)
+    L.Size = UDim2.new(0.5, 0, 1, 0)
+    L.Position = UDim2.new(0, 10, 0, 0)
+    L.BackgroundTransparency = 1
+    L.Text = name
+    L.TextColor3 = Color3.new(1, 1, 1)
+    L.Font = Enum.Font.GothamSemibold
+    L.TextSize = 13
+    L.TextXAlignment = Enum.TextXAlignment.Left
+
+    local Cntrl = Instance.new("Frame", F)
+    Cntrl.Size = UDim2.new(0, 120, 1, 0)
+    Cntrl.Position = UDim2.new(1, -130, 0, 0)
+    Cntrl.BackgroundTransparency = 1
+
+    local MB = Instance.new("TextButton", Cntrl)
+    MB.Size = UDim2.new(0, 28, 0, 28)
+    MB.Position = UDim2.new(0, 0, 0.5, -14)
+    MB.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    MB.Text = "-"
+    MB.TextColor3 = Color3.new(1, 1, 1)
+    MB.Font = Enum.Font.GothamBlack
+    Instance.new("UICorner", MB).CornerRadius = UDim.new(0, 6)
+
+    local PB = Instance.new("TextButton", Cntrl)
+    PB.Size = UDim2.new(0, 28, 0, 28)
+    PB.Position = UDim2.new(1, -28, 0.5, -14)
+    PB.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    PB.Text = "+"
+    PB.TextColor3 = Color3.new(1, 1, 1)
+    PB.Font = Enum.Font.GothamBlack
+    Instance.new("UICorner", PB).CornerRadius = UDim.new(0, 6)
+
+    local Val = Instance.new("TextLabel", Cntrl)
+    Val.Size = UDim2.new(1, -56, 1, 0)
+    Val.Position = UDim2.new(0, 28, 0, 0)
+    Val.BackgroundTransparency = 1
+    Val.Text = tostring(cfgTable[cfgKey])
+    Val.TextColor3 = Color3.fromRGB(150, 100, 255)
+    Val.Font = Enum.Font.GothamBold
+
+    MB.MouseButton1Click:Connect(function()
+        cfgTable[cfgKey] = math.clamp(cfgTable[cfgKey] - step, min, max)
+        Val.Text = tostring(cfgTable[cfgKey])
+    end)
+    PB.MouseButton1Click:Connect(function()
+        cfgTable[cfgKey] = math.clamp(cfgTable[cfgKey] + step, min, max)
+        Val.Text = tostring(cfgTable[cfgKey])
+    end)
+end
+
+-- ================= ARAYÜZ MENÜLERİ =================
+local TabMove = CreateTab("Movement")
+CreateSlider(TabMove, "Walk Speed", Config.Movement, "WalkSpeed", 16, 200, 2)
+CreateSlider(TabMove, "Jump Power", Config.Movement, "JumpPower", 50, 300, 5)
+CreateToggle(TabMove, "Noclip (Duvarlardan Geç)", Config.Movement, "Noclip")
+CreateToggle(TabMove, "Infinite Jump", Config.Movement, "InfJump")
+CreateToggle(TabMove, "Click TP (Ctrl+Click)", Config.Movement, "ClickTP")
+CreateToggle(TabMove, "Anti-Ragdoll/Stun", Config.Movement, "NoRagdoll")
+
+local TabVis = CreateTab("Visuals")
+CreateToggle(TabVis, "Fullbright", Config.Visuals, "Fullbright")
+CreateToggle(TabVis, "Player ESP", Config.Visuals, "PlayerESP")
+CreateToggle(TabVis, "Monster ESP", Config.Visuals, "EntityESP")
+CreateToggle(TabVis, "Exit/Door ESP", Config.Visuals, "ExitESP")
+CreateToggle(TabVis, "Button/Lever ESP", Config.Visuals, "ButtonESP")
+CreateToggle(TabVis, "Item/Loot ESP", Config.Visuals, "ItemESP")
+CreateToggle(TabVis, "Show Tracers", Config.Visuals, "Tracers")
+
+local TabCbt = CreateTab("Combat")
+CreateToggle(TabCbt, "Smart Aimlock", Config.Combat, "Aimlock")
+CreateSlider(TabCbt, "Aimlock Range", Config.Combat, "AimDistance", 50, 500, 25)
+CreateToggle(TabCbt, "Expand Head Hitbox", Config.Combat, "HeadHitbox")
+CreateSlider(TabCbt, "Hitbox Size", Config.Combat, "HitboxSize", 2, 30, 2)
+
+local TabUtil = CreateTab("Utility")
+CreateToggle(TabUtil, "God Mode", Config.Utility, "GodMode")
+CreateToggle(TabUtil, "Anti-AFK", Config.Utility, "AntiAFK")
+CreateToggle(TabUtil, "Auto-Interact", Config.Utility, "AutoInteract")
+CreateToggle(TabUtil, "Zoom Bypass", Config.Utility, "ZoomBypass")
+
+local isOpen = false
+ToggleBtn.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    MainFrame.Visible = true
+    PlaySound(Sounds.ClickOn, 0.3, isOpen and 1.1 or 0.8)
+    if isOpen then
+        TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 360, 0, 480),
+            Position = UDim2.new(0.5, -180, 0.5, -240)
+        }):Play()
+    else
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0.5, 0, 0.5, 0)
+        }):Play()
+        task.delay(0.3, function()
+            if not isOpen then MainFrame.Visible = false end
+        end)
+    end
+end)
+
+-- ================= ANA DÖNGÜLER (Mekanikler) =================
+RunService.Stepped:Connect(function()
+    if Config.Movement.Noclip then
+        local char = LocalPlayer.Character
+        if char then
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+LocalPlayer.Idled:Connect(function()
+    if Config.Utility.AntiAFK then
+        VirtualUser:Button2Down(Vector2.new(0, 0), Camera.CFrame)
+        task.wait(1)
+        VirtualUser:Button2Up(Vector2.new(0, 0), Camera.CFrame)
+    end
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if Config.Movement.InfJump then
+        local hum = GetHumanoid()
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if Config.Movement.ClickTP and input.UserInputType == Enum.UserInputType.MouseButton1 and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+        local root = GetRootPart()
+        if root and Mouse.Hit then
+            root.CFrame = CFrame.new(Mouse.Hit.Position + Vector3.new(0, 3, 0))
+        end
+    end
+end)
+
+local OriginalLighting = {
+    Ambient = Lighting.Ambient,
+    Brightness = Lighting.Brightness,
+    ClockTime = Lighting.ClockTime
+}
+
+RunService.RenderStepped:Connect(function()
+    local hum = GetHumanoid()
+    if hum then
+        hum.WalkSpeed = Config.Movement.WalkSpeed
+        hum.JumpPower = Config.Movement.JumpPower
+        if Config.Utility.GodMode then
+            hum.Health = hum.MaxHealth
+        end
+        if Config.Movement.NoRagdoll then
+            hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+        else
+            hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+        end
+    end
+
+    if Config.Utility.ZoomBypass then
+        LocalPlayer.CameraMaxZoomDistance = 100000
+    else
+        LocalPlayer.CameraMaxZoomDistance = 400
+    end
+
+    if Config.Visuals.Fullbright then
+        Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+    else
+        Lighting.Ambient = OriginalLighting.Ambient
+        Lighting.Brightness = OriginalLighting.Brightness
+        Lighting.ClockTime = OriginalLighting.ClockTime
+    end
+
+    if Config.Visuals.Tracers then
+        for target, line in pairs(tracerCache) do
+            if target and target.Parent and target:FindFirstChildWhichIsA("BasePart") then
+                local vector, onScreen = Camera:WorldToViewportPoint(target:FindFirstChildWhichIsA("BasePart").Position)
+                if onScreen then
+                    line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                    line.To = Vector2.new(vector.X, vector.Y)
+                    line.Visible = true
+                else
+                    line.Visible = false
+                end
+            else
+                line.Visible = false
+            end
+        end
+    end
+
+    if Config.Combat.Aimlock then
+        local nearest = nil
+        local shortest = Config.Combat.AimDistance
+        local myRoot = GetRootPart()
+        if myRoot then
+            for _, obj in ipairs(Cache.Entities) do
+                if obj == nil then continue end
+                local tPart = obj:FindFirstChild(Config.Combat.AimPart) or obj:FindFirstChildWhichIsA("BasePart")
+                if tPart then
+                    local dist = (tPart.Position - myRoot.Position).Magnitude
+                    if dist < shortest then
+                        shortest = dist
+                        nearest = tPart
+                    end
+                end
+            end
+            if nearest then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, nearest.Position)
+            end
+        end
+    end
+
+    -- DÜZELTİLMİŞ HITBOX: Gerçek Head'e dokunmaz, canavarlar donmaz
+    if Config.Combat.HeadHitbox then
+        for _, obj in ipairs(Cache.Entities) do
+            if obj == nil then continue end
+            ApplyHitbox(obj)
+        end
+    else
+        ClearHitboxes()
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.5) do
+        if not Config.Visuals.Tracers then
+            for _, line in pairs(tracerCache) do
+                line.Visible = false
+            end
+        end
+
+        if Config.Utility.AutoInteract then
+            local myRoot = GetRootPart()
+            if myRoot then
+                for _, prompt in ipairs(Cache.Prompts) do
+                    if prompt and prompt.Parent and prompt.Enabled then
+                        local pPart = prompt.Parent:IsA("BasePart") and prompt.Parent or prompt.Parent:FindFirstChildWhichIsA("BasePart")
+                        if pPart and (pPart.Position - myRoot.Position).Magnitude <= prompt.MaxActivationDistance then
+                            pcall(function() fireproximityprompt(prompt) end)
+                        end
+                    end
+                end
+            end
+        end
+
+        if Config.Visuals.PlayerESP or Config.Visuals.Tracers then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character then
+                    if Config.Visuals.PlayerESP then
+                        CreateHighlight(p.Character, Color3.fromRGB(100, 200, 255), p.Name)
+                    end
+                    if Config.Visuals.Tracers then
+                        DrawTracer(p.Character, Color3.fromRGB(100, 200, 255))
+                    end
+                end
+            end
+        end
+
+        if Config.Visuals.EntityESP or Config.Visuals.Tracers then
+            for _, obj in ipairs(Cache.Entities) do
+                if obj == nil then continue end
+                if Config.Visuals.EntityESP then
+                    CreateHighlight(obj, Color3.fromRGB(255, 50, 50), "[Monster] " .. obj.Name)
+                end
+                if Config.Visuals.Tracers then
+                    DrawTracer(obj, Color3.fromRGB(255, 50, 50))
+                end
+            end
+        end
+
+        if Config.Visuals.ExitESP then
+            for _, obj in ipairs(Cache.Exits) do
+                if obj then
+                    CreateHighlight(obj, Color3.fromRGB(50, 255, 50), "[Exit/Door]")
+                end
+            end
+        end
+
+        if Config.Visuals.ButtonESP then
+            for _, obj in ipairs(Cache.Buttons) do
+                if obj then
+                    CreateHighlight(obj, Color3.fromRGB(255, 255, 50), "[Button/Lever]")
+                end
+            end
+        end
+
+        if Config.Visuals.ItemESP then
+            for _, obj in ipairs(Cache.Items) do
+                if obj then
+                    CreateHighlight(obj, Color3.fromRGB(255, 150, 50), "[Item]")
+                end
+            end
+        end
+    end
+end)
