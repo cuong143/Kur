@@ -18,11 +18,11 @@ local success, result = pcall(function() return game:GetService("CoreGui") end)
 if success and result then CoreGui = result else CoreGui = LocalPlayer:WaitForChild("PlayerGui") end
 
 for _, v in pairs(CoreGui:GetChildren()) do
-    if v.Name == "HileciBestoUI" then v:Destroy() end
+    if v.Name == "Cuong gui" then v:Destroy() end
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HileciBestoUI"
+ScreenGui.Name = "Cuong gui"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -38,49 +38,28 @@ local Config = {
         NoRagdoll = false
     },
     Combat = {
-        Aimlock = false,
+        AimNpc = false,
         AimPart = "Head",
         AimDistance = 150,
-        HeadHitbox = false,
-        HitboxSize = 8
+        HeadHitboxNpc = false,
+        HitboxNpcSize = 8
     },
     Visuals = {
         Fullbright = false,
         PlayerESP = false,
-        EntityESP = false,
+        MonsterESP = false,
         ItemESP = false,
         ExitESP = false,
         ButtonESP = false,
         Tracers = false
     },
     Utility = {
-        GodMode = false,
         AntiAFK = false,
         AutoInteract = false,
         ZoomBypass = false
     }
 }
 
--- ================= SES EFEKTLERİ =================
-local Sounds = {
-    Hover = 8996611388,
-    ClickOn = 6895079853,
-    ClickOff = 6895079853,
-    Intro = 6042053626,
-    Success = 8141349377
-}
-
-local function PlaySound(id, volume, pitch)
-    task.spawn(function()
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://" .. tostring(id)
-        sound.Volume = volume or 0.3
-        sound.PlaybackSpeed = pitch or 1
-        sound.Parent = SoundService
-        sound:Play()
-        Debris:AddItem(sound, 2)
-    end)
-end
 
 -- ================= ZAYIF TABLOLAR (WEAK TABLES) =================
 local Cache = {
@@ -152,9 +131,9 @@ local function IsRealEntity(obj)
     return false
 end
 
--- ================= THROTTLE JITTER (OBJE TARAYICI) =================
+-- ================= quét map =================
 task.spawn(function()
-    while task.wait(3) do
+    while task.wait(1) do
         table.clear(Cache.Entities)
         table.clear(Cache.Exits)
         table.clear(Cache.Buttons)
@@ -186,7 +165,7 @@ task.spawn(function()
     end
 end)
 
--- ================= KARAKTER KORUMA SİSTEMİ =================
+-- =================reset sp jp =================
 LocalPlayer.CharacterAdded:Connect(function(newChar)
     local hum = newChar:WaitForChild("Humanoid", 5)
     if hum then
@@ -195,7 +174,7 @@ LocalPlayer.CharacterAdded:Connect(function(newChar)
     end
 end)
 
--- ================= ESP MONTONU =================
+-- ================= ESP monster =================
 local function CreateHighlight(target, color, text)
     if not target or not target.Parent then return end
     if espCache[target] then
@@ -249,8 +228,8 @@ local function ClearVisuals()
     table.clear(tracerCache)
 end
 
--- ================= HITBOX SİSTEMİ (DÜZELTİLMİŞ) =================
--- Gerçek Head parçasına dokunmaz -> canavarlar donmaz.
+-- ================= HITBOX head =================
+--không chạm vào head thật -> canavarlar donmaz.
 local function ApplyHitbox(obj)
     if obj == nil then return end
     local head = obj:FindFirstChild("Head")
@@ -300,7 +279,7 @@ local function ClearHitboxes()
     table.clear(hitboxCache)
 end
 
--- ================= INTRO SİSTEMİ =================
+-- ================= INTRO =================
 task.wait(1)
 local IntroFrame = Instance.new("Frame", ScreenGui)
 IntroFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -309,7 +288,7 @@ IntroFrame.ZIndex = 999
 IntroFrame.BackgroundTransparency = 1
 
 local IntroText = Instance.new("TextLabel", IntroFrame)
-IntroText.Text = "HileciBesto"
+IntroText.Text = "Cuong"
 IntroText.Font = Enum.Font.GothamBlack
 IntroText.TextSize = 60
 IntroText.TextColor3 = Color3.fromRGB(150, 100, 255)
@@ -361,7 +340,7 @@ TweenService:Create(LoadText, TweenOut, {TextTransparency = 1}):Play()
 task.wait(0.5)
 IntroFrame:Destroy()
 
--- ================= SEKMELİ ARAYÜZ (TAB UI) =================
+-- ================= TAB UI =================
 local ToggleBtn = Instance.new("TextButton", ScreenGui)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 ToggleBtn.Position = UDim2.new(0.5, -75, 0, -50)
