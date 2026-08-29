@@ -54,7 +54,7 @@ WalkSpeedSlider = Tab:CreateSlider({
     Range = {1, 200},
     Increment = 1,
     Suffix = "WalkSpeed",
-    CurrentValue = 16,
+    CurrentValue = 20,
     Callback = function(Value)
         local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
@@ -69,9 +69,9 @@ Tab:CreateButton({
     Callback = function()
         local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
-            humanoid.WalkSpeed = 16
+            humanoid.WalkSpeed = 20
         end
-        WalkSpeedSlider:Set(16)
+        WalkSpeedSlider:Set(20)
     end,
 })
 
@@ -147,6 +147,30 @@ SupportTab:CreateButton({
         end)
         if not success then
             warn("Lỗi khi tải aimplayer: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "FLing",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/fling"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải Fling: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "FLingNoclip",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/flingnoclip"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải FlingNoclip: " .. tostring(result))
         end
     end,
 })
