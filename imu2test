@@ -56,34 +56,6 @@ SupportTab:CreateButton({
     end,
 })
 
--- Slider Speed
-local WalkSpeedSlider
-WalkSpeedSlider = Tab:CreateSlider({
-    Name = "Speed",
-    Range = {1, 200},
-    Increment = 1,
-    Suffix = "WalkSpeed",
-    CurrentValue = 20,
-    Callback = function(Value)
-        local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = Value
-        end
-    end,
-})
-
--- Toggle Reset Speed
-Tab:CreateButton({
-    Name = "Reset Speed",
-    Callback = function()
-        local humanoid = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = 20
-        end
-        WalkSpeedSlider:Set(20)
-    end,
-})
-
 -- Tab PvP
 local SupportTab = Window:CreateTab("PVP")
 
