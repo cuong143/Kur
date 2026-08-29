@@ -20,6 +20,43 @@ local Window = Rayfield:CreateWindow({
 -- tab Char
 local SupportTab = Window:CreateTab("Character")
 
+SupportTab:CreateInput({
+    Name = "TpWalk",
+    PlaceholderText = "EnterNumber...",
+    RemoveTextAfterFocusLost = false,
+
+    Callback = function(Value)
+        local Number = tonumber(Value)
+
+        if not Number then
+            warn("Please enter a valid number!")
+            return
+        end
+
+        if not TpWalk then
+            local success, result = pcall(function()
+                TpWalk = loadstring(game:HttpGet(
+                    "https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/TpWalk"
+                ))()
+            end)
+
+            if not success then
+                warn("Lỗi khi tải TpWalk: " .. tostring(result))
+                TpWalk = nil
+                return
+            end
+        end
+
+        local success, result = pcall(function()
+            TpWalk(Number)
+        end)
+
+        if not success then
+            warn("Lỗi khi thay đổi TpWalk: " .. tostring(result))
+        end
+    end,
+})
+
 SupportTab:CreateButton({
     Name = "Infjump",
     Callback = function()
