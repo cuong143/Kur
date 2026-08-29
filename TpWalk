@@ -1,0 +1,43 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local Speed = 0
+local Connection
+
+local function SetSpeed(Value)
+    Speed = tonumber(Value) or 0
+
+    -- Value = 0 → tắt
+    if Speed <= 0 then
+        if Connection then
+            Connection:Disconnect()
+            Connection = nil
+        end
+        return
+    end
+
+    -- Đã chạy rồi thì chỉ cập nhật Speed
+    if Connection then
+        return
+    end
+
+    -- Value >= 1 → bật
+    Connection = RunService.Heartbeat:Connect(function(delta)
+        local Character = LocalPlayer.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+
+        if not Character or not Humanoid or not Humanoid.Parent then
+            return
+        end
+
+        if Speed > 0 and Humanoid.MoveDirection.Magnitude > 0 then
+            Character:TranslateBy(
+                Humanoid.MoveDirection * Speed * delta * 10
+            )
+        end
+    end)
+end
+
+return SetSpeed
