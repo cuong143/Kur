@@ -1,10 +1,24 @@
-
 local UIS = game:GetService("UserInputService")
-local player = game.Players.LocalPlayer
+local Player = game.Players.LocalPlayer
 
-UIS.JumpRequest:Connect(function()
-    local char = player.Character
-    if char and char:FindFirstChildOfClass("Humanoid") then
-        char:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
+getgenv().InfJumpEnabled = not (getgenv().InfJumpEnabled or false)
+
+if getgenv().InfJumpConnection then
+    getgenv().InfJumpConnection:Disconnect()
+    getgenv().InfJumpConnection = nil
+end
+
+if getgenv().InfJumpEnabled then
+    getgenv().InfJumpConnection = UIS.JumpRequest:Connect(function()
+        local Character = Player.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+
+        if Humanoid then
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end)
+
+    print("InfJump: ON")
+else
+    print("InfJump: OFF")
+end
