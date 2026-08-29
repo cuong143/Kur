@@ -60,13 +60,13 @@ SupportTab:CreateButton({
 local SupportTab = Window:CreateTab("PVP")
 
 SupportTab:CreateButton({
-    Name = "Aimbot",
+    Name = "Aimnpc",
     Callback = function()
         local success, result = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/Aim"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/Aimnpc"))()
         end)
         if not success then
-            warn("Lỗi khi tải Aimbot: " .. tostring(result))
+            warn("Lỗi khi tải Aimnpc: " .. tostring(result))
         end
     end,
 })
