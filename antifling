@@ -1,0 +1,26 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+ 
+local LocalPlayer = Players.LocalPlayer
+ 
+local connection = nil
+ 
+local function disableCollisions()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            for _, part in ipairs(player.Character:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
+end
+ 
+-- Ngắt kết nối cũ nếu script bị chạy lại (tránh tạo trùng connection)
+if connection then
+    connection:Disconnect()
+    connection = nil
+end
+ 
+connection = RunService.Stepped:Connect(disableCollisions)
