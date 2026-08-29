@@ -1,21 +1,17 @@
-local Lighting = game:GetService("Lighting")
-local RunService = game:GetService("RunService")
- 
-local brightLoop = nil
- 
-local function applyFullbright()
-    Lighting.Brightness = 2
-    Lighting.ClockTime = 14
-    Lighting.FogEnd = 100000
-    Lighting.GlobalShadows = false
-    Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+local L=game:GetService("Lighting")
+local R=game:GetService("RunService")
+
+getgenv().FB=not getgenv().FB
+if getgenv().FBC then getgenv().FBC:Disconnect() end
+
+if getgenv().FB then
+    local function F()
+        L.Brightness=2
+        L.ClockTime=14
+        L.FogEnd=100000
+        L.GlobalShadows=false
+        L.OutdoorAmbient=Color3.fromRGB(128,128,128)
+    end
+    F()
+    getgenv().FBC=R.RenderStepped:Connect(F)
 end
- 
--- Ngắt kết nối cũ nếu script bị chạy lại (tránh tạo trùng connection)
-if brightLoop then
-    brightLoop:Disconnect()
-    brightLoop = nil
-end
- 
-applyFullbright() -- áp dụng ngay lập tức, không cần chờ frame đầu tiên
-brightLoop = RunService.RenderStepped:Connect(applyFullbright)
