@@ -1,89 +1,17 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local noclipEnabled = false
-
--- Hàm gửi thông báo
-local function sendNotification(title, text, duration)
-    pcall(function()
-        game.StarterGui:SetCore("SendNotification", {
-            Title = title,
-            Text = text,
-            Duration = duration or 4
-        })
+local R=game:GetService("RunService")
+local P=game.Players.LocalPlayer
+getgenv().NC=not getgenv().NC
+if getgenv().NCC then getgenv().NCC:Disconnect() end
+if getgenv().NC then
+    getgenv().NCC=R.Stepped:Connect(function()
+        local c=P.Character
+        if c then for _,v in c:GetDescendants() do
+            if v:IsA("BasePart") then v.CanCollide=false end
+        end end
     end)
+else
+    local c=P.Character
+    if c then for _,v in c:GetDescendants() do
+        if v:IsA("BasePart") then v.CanCollide=true end
+    end end
 end
-
--- Tải Tora Library
-local success, library = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/librarynew", true))()
-end)
-
-if not success or not library then
-    sendNotification("Error", "Failed to load Tora Library", 5)
-    return
-end
-
--- Tạo UI
-local window = library:CreateWindow("DEAD RAILS - NoClip")
-
--- Hàm kiểm tra nhân vật (nhẹ hơn)
-local function checkCharacter()
-    return player.Character and player.Character:FindFirstChild("Humanoid")
-end
-
--- Hàm bật/tắt noclip
-local function toggleNoclip()
-    if not checkCharacter() then
-        sendNotification("Error", "Nhân vật chưa load hoặc đã chết!", 4)
-        return
-    end
-
-    noclipEnabled = not noclipEnabled
-    local character = player.Character
-    for _, part in pairs(character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = not noclipEnabled
-        end
-    end
-    sendNotification("NoClip Status", "NoClip is now " .. (noclipEnabled and "Enabled" or "Disabled"), 4)
-end
-
--- Giữ noclip ổn định (tùy chọn lặp CanCollide)
-RunService.Stepped:Connect(function()
-    if noclipEnabled and checkCharacter() then
-        -- Tùy chọn: Lặp CanCollide nếu server ép ngược
-        for _, part in pairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-    end
-end)
-
--- Tự bật lại noclip khi respawn
-player.CharacterAdded:Connect(function(character)
-    if noclipEnabled then
-        wait(0.5) -- Đợi nhân vật load
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-        sendNotification("NoClip Restored", "NoClip vẫn bật sau khi respawn!", 4)
-    end
-end)
-
--- Nút noclip trong UI
-window:AddButton({
-    text = "NoClip",
-    callback = toggleNoclip
-})
-
--- Label tín dụng
-window:AddLabel({ text = "Cường", type = "label" })
-
--- Khởi tạo UI
-library:Init()
-
-sendNotification("NoClip Ready", "Nhấn nút NoClip để bật/tắt!", 5)
