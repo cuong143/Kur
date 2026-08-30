@@ -158,14 +158,14 @@ SupportTab:CreateButton({
 
 SupportTab:CreateInput({
     Name = "GotoPlr",
-    PlaceholderText = "EnterPlr...",
+    PlaceholderText = "Enter username...",
     RemoveTextAfterFocusLost = false,
 
     Callback = function(Value)
-        local Text = tostring(Value)
+        local Text = tostring(Value):match("^%s*(.-)%s*$")
 
         if Text == "" then
-            warn("PlsEnterAValidPlr!")
+            warn("Please enter a player name!")
             return
         end
 
@@ -176,19 +176,41 @@ SupportTab:CreateInput({
                 ))()
             end)
 
-            if not success then
+            if not success or type(GotoPlr) ~= "function" then
                 warn("Lỗi khi tải GotoPlr: " .. tostring(result))
                 GotoPlr = nil
                 return
             end
         end
 
+        -- Tìm player theo một phần Username, không phân biệt hoa/thường
+        local target = nil
+        local search = Text:lower()
+
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            if player.Name:lower():find(search, 1, true) then
+                target = player
+                break
+            end
+        end
+
+        if not target then
+            warn("Không tìm thấy player: " .. Text)
+            return
+        end
+
         local success, result = pcall(function()
-            GotoPlr(game.Players.LocalPlayer, Text, true)
+            return GotoPlr(
+                game:GetService("Players").LocalPlayer,
+                target.Name,
+                true
+            )
         end)
 
         if not success then
             warn("Lỗi khi teleport: " .. tostring(result))
+        elseif result == false then
+            warn("GotoPlr không thể teleport tới player này.")
         end
     end,
 })
