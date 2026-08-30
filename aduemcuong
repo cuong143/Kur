@@ -94,7 +94,7 @@ SupportTab:CreateButton({
 })
 
 -- Tab PvP
-local SupportTab = Window:CreateTab("PVP")
+local SupportTab = Window:CreateTab("pvp")
 
 SupportTab:CreateButton({
     Name = "Aimnpc",
@@ -215,8 +215,8 @@ SupportTab:CreateInput({
     end,
 })
 
---tab Visual
-local SupportTab = Window:CreateTab("Visual")
+--tab More
+local SupportTab = Window:CreateTab("More")
 
 SupportTab:CreateButton({
     Name = "FullBright",
@@ -242,6 +242,29 @@ SupportTab:CreateButton({
     end,
 })
 
+SupportTab:CreateButton({
+    Name = "Instant",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/Instant"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải Instant: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "antilag",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/antilag"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải antilag: " .. tostring(result))
+        end
+    end,
+})
 
 
 local MainTab = Window:CreateTab("Fly")
