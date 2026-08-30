@@ -1,4 +1,4 @@
-local fov = 136
+local fov = 200
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Cam = workspace.CurrentCamera
