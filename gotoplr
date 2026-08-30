@@ -1,0 +1,50 @@
+local Players = game:GetService("Players")
+
+-- Hàm phụ: reset vận tốc sau khi teleport (thay cho breakVelocity() gốc)
+local function breakVelocity(character)
+	local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+	if rootPart then
+		rootPart.AssemblyLinearVelocity = Vector3.zero
+		rootPart.AssemblyAngularVelocity = Vector3.zero
+	end
+end
+
+-- Hàm chính: dịch chuyển "speaker" đến gần người chơi có tên "targetName"
+local function goToPlayer(speaker, targetName, waitForStream)
+	if speaker == nil or targetName == nil then return false end
+
+	local character = speaker.Character
+	local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+	if humanoid == nil then return false end
+
+	-- Đứng dậy nếu đang ngồi
+	if humanoid.SeatPart then
+		humanoid.Sit = false
+		task.wait(0.1)
+	end
+
+	-- Tìm người chơi mục tiêu theo tên chính xác (có thể đổi thành FindFirstChild để match gần đúng)
+	local targetPlayer = Players:FindFirstChild(targetName)
+	if targetPlayer == nil then
+		warn("Không tìm thấy người chơi: " .. tostring(targetName))
+		return false
+	end
+
+	local targetCharacter = targetPlayer.Character
+	if targetCharacter == nil then return false end
+
+	local targetPivot = targetCharacter:GetPivot()
+	local targetPosition = targetPivot.Position
+
+	if waitForStream and workspace.StreamingEnabled then
+		task.spawn(speaker.RequestStreamAroundAsync, speaker, targetPosition, 5)
+		targetCharacter:WaitForChild("HumanoidRootPart", 5)
+	end
+
+	character:PivotTo(CFrame.new(targetPosition + (targetPivot.LookVector * 3), targetPosition))
+	breakVelocity(character)
+
+	return true
+end
+
+return goToPlayer
