@@ -156,6 +156,43 @@ SupportTab:CreateButton({
     end,
 })
 
+SupportTab:CreateInput({
+    Name = "GotoPlr",
+    PlaceholderText = "EnterPlr...",
+    RemoveTextAfterFocusLost = false,
+
+    Callback = function(Value)
+        local Text = tostring(Value)
+
+        if Text == "" then
+            warn("PlsEnterAValidPlr!")
+            return
+        end
+
+        if not GotoPlr then
+            local success, result = pcall(function()
+                GotoPlr = loadstring(game:HttpGet(
+                    "https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/gotoplr"
+                ))()
+            end)
+
+            if not success then
+                warn("Lỗi khi tải GotoPlr: " .. tostring(result))
+                GotoPlr = nil
+                return
+            end
+        end
+
+        local success, result = pcall(function()
+            GotoPlr(game.Players.LocalPlayer, Text, true)
+        end)
+
+        if not success then
+            warn("Lỗi khi teleport: " .. tostring(result))
+        end
+    end,
+})
+
 --tab Visual
 local SupportTab = Window:CreateTab("Visual")
 
