@@ -1,0 +1,18 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local function makePromptInstant(prompt)
+    if prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0                  
+        prompt.RequiresLineOfSight = false  
+        prompt.MaxActivationDistance = 10  
+    end
+end
+
+for _, descendant in ipairs(workspace:GetDescendants()) do
+    makePromptInstant(descendant)
+end
+
+workspace.DescendantAdded:Connect(function(descendant)
+    makePromptInstant(descendant)
+end)
