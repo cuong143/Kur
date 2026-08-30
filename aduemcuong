@@ -156,8 +156,8 @@ SupportTab:CreateButton({
     end,
 })
 
---tab ?
-local SupportTab = Window:CreateTab("?")
+--tab Visual
+local SupportTab = Window:CreateTab("Visual")
 
 SupportTab:CreateButton({
     Name = "FullBright",
@@ -171,61 +171,107 @@ SupportTab:CreateButton({
     end,
 })
 
--- Tab ESP
-local ESPTab = Window:CreateTab(" ESP")
+SupportTab:CreateButton({
+    Name = "EspMonter",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/Espmonter"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải EspMonter: " .. tostring(result))
+        end
+    end,
+})
+
+-- ESP
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
 
 local ESPEnabled = false
 local ESPConnections = {}
 
+
 local function removeAllESP()
-    for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+    for _, player in ipairs(Players:GetPlayers()) do
         if player.Character then
             local char = player.Character
-            if char:FindFirstChild("ESP_Box") then
-                char.ESP_Box:Destroy()
+
+            local box = char:FindFirstChild("ESP_Box")
+            if box then
+                box:Destroy()
             end
-            if char:FindFirstChild("Head") and char.Head:FindFirstChild("ESP_Name") then
-                char.Head.ESP_Name:Destroy()
+
+            local head = char:FindFirstChild("Head")
+            if head then
+                local name = head:FindFirstChild("ESP_Name")
+                if name then
+                    name:Destroy()
+                end
             end
         end
     end
-    for _, conn in pairs(ESPConnections) do
+
+    for _, conn in ipairs(ESPConnections) do
         conn:Disconnect()
     end
+
     table.clear(ESPConnections)
 end
 
-local function createESP(player)
-    local Players = game:GetService("Players")
-    local RunService = game:GetService("RunService")
-    local Camera = workspace.CurrentCamera
-    local LocalPlayer = Players.LocalPlayer
 
-    if player == LocalPlayer then return end
+local function createESP(player)
+    if player == LocalPlayer then
+        return
+    end
 
     local function updateESP()
+        if not ESPEnabled then
+            return
+        end
+
         local char = player.Character
-        if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Head") then return end
-        local hrp = char.HumanoidRootPart
-        local head = char.Head
+        if not char then
+            return
+        end
 
-        if char:FindFirstChild("ESP_Box") then char.ESP_Box:Destroy() end
-        if head:FindFirstChild("ESP_Name") then head.ESP_Name:Destroy() end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local head = char:FindFirstChild("Head")
 
-        local highlight = Instance.new("Highlight", char)
+        if not hrp or not head then
+            return
+        end
+
+        -- Xóa ESP cũ
+        local oldBox = char:FindFirstChild("ESP_Box")
+        if oldBox then
+            oldBox:Destroy()
+        end
+
+        local oldName = head:FindFirstChild("ESP_Name")
+        if oldName then
+            oldName:Destroy()
+        end
+
+        -- Box ESP
+        local highlight = Instance.new("Highlight")
         highlight.Name = "ESP_Box"
         highlight.FillTransparency = 1
         highlight.OutlineTransparency = 0
         highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+        highlight.Parent = char
 
-        local billboard = Instance.new("BillboardGui", head)
+        -- Name ESP
+        local billboard = Instance.new("BillboardGui")
         billboard.Name = "ESP_Name"
         billboard.Adornee = head
         billboard.AlwaysOnTop = true
         billboard.Size = UDim2.new(5, 0, 1, 0)
         billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+        billboard.Parent = head
 
-        local label = Instance.new("TextLabel", billboard)
+        local label = Instance.new("TextLabel")
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.TextColor3 = Color3.fromRGB(255, 0, 0)
@@ -233,26 +279,83 @@ local function createESP(player)
         label.Text = player.Name
         label.Font = Enum.Font.SourceSansBold
         label.TextScaled = true
+        label.Parent = billboard
 
-        local conn = RunService.RenderStepped:Connect(function()
-            if player and player.Character and player.Character:FindFirstChild("Head") then
-                local dist = (Camera.CFrame.Position - hrp.Position).Magnitude
-                billboard.Size = UDim2.new(math.clamp(10 / dist, 1, 5), 0, math.clamp(2 / dist, 0.5, 2), 0)
+        -- Cập nhật kích thước tên theo khoảng cách
+        local conn
+
+        conn = RunService.RenderStepped:Connect(function()
+            if not ESPEnabled then
+                conn:Disconnect()
+                return
             end
+
+            local currentChar = player.Character
+            local currentHead = currentChar and currentChar:FindFirstChild("Head")
+            local currentHrp = currentChar and currentChar:FindFirstChild("HumanoidRootPart")
+
+            if not currentHead or not currentHrp or not billboard.Parent then
+                return
+            end
+
+            local camera = workspace.CurrentCamera
+            local dist = (camera.CFrame.Position - currentHrp.Position).Magnitude
+
+            billboard.Size = UDim2.new(
+                math.clamp(10 / dist, 1, 5),
+                0,
+                math.clamp(2 / dist, 0.5, 2),
+                0
+            )
         end)
+
         table.insert(ESPConnections, conn)
     end
 
+    -- ESP lại khi player respawn
     local conn = player.CharacterAdded:Connect(function()
-        task.wait(1)
-        updateESP()
+        if ESPEnabled then
+            task.wait(1)
+            updateESP()
+        end
     end)
+
     table.insert(ESPConnections, conn)
 
     if player.Character then
         updateESP()
     end
 end
+
+
+local function enableESP()
+    ESPEnabled = true
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        createESP(player)
+    end
+end
+
+
+local function disableESP()
+    ESPEnabled = false
+    removeAllESP()
+end
+
+
+-- Toggle ESP trong Visual
+VisualTab:CreateToggle({
+    Name = "ESP",
+    CurrentValue = false,
+
+    Callback = function(Value)
+        if Value then
+            enableESP()
+        else
+            disableESP()
+        end
+    end,
+})
 
 ESPTab:CreateToggle({
     Name = "espplayer",
@@ -269,18 +372,6 @@ ESPTab:CreateToggle({
             table.insert(ESPConnections, conn)
         else
             removeAllESP()
-        end
-    end,
-})
-
-ESPTab:CreateButton({
-    Name = "ESP Monster",
-    Callback = function()
-        local success, result = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/Espmonter"))()
-        end)
-        if not success then
-            warn("Lỗi khi tải ESP Monster: " .. tostring(result))
         end
     end,
 })
