@@ -1,0 +1,95 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local originalSizes = {}
+local currentSize = 0
+
+local function ResizeHead(targetPlayer, size)
+    if targetPlayer == LocalPlayer then
+        return
+    end
+
+    local character = targetPlayer.Character
+    if not character then
+        return
+    end
+
+    local head = character:FindFirstChild("Head")
+    if not head or not head:IsA("BasePart") then
+        return
+    end
+
+    if not originalSizes[head] then
+        originalSizes[head] = {
+            Size = head.Size,
+            Transparency = head.Transparency,
+            CanCollide = head.CanCollide,
+            Massless = head.Massless,
+            Anchored = head.Anchored,
+        }
+    end
+
+    -- 0 = tắt và khôi phục
+    if size <= 0 then
+        local original = originalSizes[head]
+
+        head.Size = original.Size
+        head.Transparency = original.Transparency
+        head.CanCollide = original.CanCollide
+        head.Massless = original.Massless
+        head.Anchored = original.Anchored
+
+        return
+    end
+
+    size = math.max(size, 0.1)
+
+    head.Size = Vector3.new(size, size, size)
+    head.Transparency = 0.4
+    head.CanCollide = false
+    head.Massless = true
+    head.Anchored = false
+end
+
+local function Update()
+    for _, targetPlayer in ipairs(Players:GetPlayers()) do
+        if targetPlayer ~= LocalPlayer then
+            ResizeHead(targetPlayer, currentSize)
+        end
+    end
+end
+
+-- Character mới
+Players.PlayerAdded:Connect(function(targetPlayer)
+    if targetPlayer == LocalPlayer then
+        return
+    end
+
+    targetPlayer.CharacterAdded:Connect(function()
+        task.wait()
+
+        if currentSize > 0 then
+            ResizeHead(targetPlayer, currentSize)
+        end
+    end)
+end)
+
+-- Theo dõi liên tục
+RunService.Heartbeat:Connect(function()
+    if currentSize > 0 then
+        Update()
+    end
+end)
+
+-- Function mà SupportTab sẽ gọi
+return function(size)
+    currentSize = tonumber(size) or 0
+
+    if currentSize < 0 then
+        currentSize = 0
+    end
+
+    Update()
+end
