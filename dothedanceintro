@@ -1,0 +1,17 @@
+local url = "https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/dothedanceintro.mp3"
+local file = "dothedanceintro.mp3"
+
+if not isfile(file) then
+    writefile(file, game:HttpGet(url))
+end
+
+local sound = Instance.new("Sound")
+sound.SoundId = getcustomasset(file)
+sound.Volume = 5
+sound.Parent = game:GetService("SoundService")
+
+sound:Play()
+
+sound.Ended:Connect(function()
+    sound:Destroy()
+end)
