@@ -1,5 +1,10 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/wonhee1"))()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/dothedanceintro"))()
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/wonhee1"))()
+end)
+
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/dothedanceintro"))()
+end)
 
 -- Rayfield
 local success, Rayfield = pcall(function()
