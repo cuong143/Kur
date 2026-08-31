@@ -1,0 +1,48 @@
+-- Rayfield
+local success, Rayfield = pcall(function()
+    return loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+end)
+if not success then
+    warn("Lỗi khi tải Rayfield: " .. tostring(Rayfield))
+    return
+end
+
+-- Window
+local Window = Rayfield:CreateWindow({
+    Name = "Cuonglor",
+    LoadingTitle = "WonHee",
+    LoadingSubtitle = "by cuong",
+    ConfigurationSaving = {
+        Enabled = false,
+    }
+})
+
+-- tab music
+local SupportTab = Window:CreateTab("Music")
+
+local MusicSound = nil
+
+SupportTab:CreateButton({
+    Name = "Magnetic",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/magnetic"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải Magnetic: " .. tostring(result))
+        end
+    end,
+})
