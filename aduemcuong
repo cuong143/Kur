@@ -707,40 +707,16 @@ SupportTab:CreateButton({
         end
 
         local success, result = pcall(function()
-
-            local url = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/StayWithMe"
-            local code = game:HttpGet(url)
-
-            print("1. Code length:", #code)
-
-            local func, err = loadstring(code)
-
-            if not func then
-                error("2. loadstring lỗi: " .. tostring(err))
-            end
-
-            print("2. loadstring OK")
-
-            local sound = func()
-
-            print("3. Script return:", sound)
-
-            if not sound then
-                error("3. Script không return Sound")
-            end
-
-            MusicSound = sound
-
-            print("4. MusicSound OK")
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/StayWithMe"))()
         end)
 
         if not success then
             MusicSound = nil
-            warn("StayWithMe ERROR: " .. tostring(result))
+            warn("Lỗi khi tải SWM: " .. tostring(result))
         end
     end,
 })
-local MainTab = Window:CreateTab("Fly")
+
 
 -- Vars
 local Players = game:GetService("Players")
