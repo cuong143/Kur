@@ -7,7 +7,7 @@ end
 
 local sound = Instance.new("Sound")
 sound.SoundId = getcustomasset(file)
-sound.Volume = 5
+sound.Volume = 1000
 sound.Parent = game:GetService("SoundService")
 
 sound:Play()
