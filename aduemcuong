@@ -30,7 +30,7 @@ local SupportTab = Window:CreateTab("Character")
 
 SupportTab:CreateInput({
     Name = "TpWalk",
-    PlaceholderText = "EnterNumber...",
+    PlaceholderText = "EnterNumber",
     RemoveTextAfterFocusLost = false,
 
     Callback = function(Value)
