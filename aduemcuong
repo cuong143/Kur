@@ -1,6 +1,4 @@
-task.spawn(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/wonhee2"))()
-end)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/wonhee2"))()
 
 task.spawn(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/dothedanceintro"))()
