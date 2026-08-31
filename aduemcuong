@@ -1,3 +1,4 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/wonhee1"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/dothedanceintro"))()
 
 -- Rayfield
