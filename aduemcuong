@@ -707,7 +707,23 @@ SupportTab:CreateButton({
         end
 
         local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/StayWithMe"))()
+            local code = game:HttpGet(
+                "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/StayWithMe"
+            )
+
+            print("StayWithMe code length:", #code)
+
+            local func, err = loadstring(code)
+
+            if not func then
+                error("loadstring lỗi: " .. tostring(err))
+            end
+
+            MusicSound = func()
+
+            if not MusicSound then
+                error("StayWithMe không return Sound")
+            end
         end)
 
         if not success then
@@ -716,7 +732,6 @@ SupportTab:CreateButton({
         end
     end,
 })
-
 
 local MainTab = Window:CreateTab("Fly")
 
