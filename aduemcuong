@@ -707,12 +707,21 @@ SupportTab:CreateButton({
         end
 
         local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/StayWithMe"))()
+            local url = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/StayWithMe"
+            local code = game:HttpGet(url)
+
+            print("StayWithMe length:", #code)
+            print("StayWithMe content:", code:sub(1, 300))
+
+            local func = loadstring(code)
+            assert(func, "Không thể load StayWithMe")
+
+            MusicSound = func()
         end)
 
         if not success then
             MusicSound = nil
-            warn("Lỗi khi tải StayWithMe: " .. tostring(result))
+            warn("Lỗi StayWithMe: " .. tostring(result))
         end
     end,
 })
