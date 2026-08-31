@@ -718,6 +718,8 @@ SupportTab:CreateButton({
 })
 
 
+local SupportTab = Window:CreateTab("Fly")
+
 -- Vars
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
