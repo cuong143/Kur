@@ -334,6 +334,60 @@ SupportTab:CreateButton({
     end,
 })
 
+local MusicSound = nil
+
+SupportTab:CreateButton({
+    Name = "DoTheDance",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/dothedance"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải DoTheDance: " .. tostring(result))
+        end
+    end,
+})
+
+local MusicSound = nil
+
+SupportTab:CreateButton({
+    Name = "NotCuteAnymore",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/notcuteanymore"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải NotCuteAnymore: " .. tostring(result))
+        end
+    end,
+})
+
 
 local MainTab = Window:CreateTab("Fly")
 
