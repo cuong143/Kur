@@ -1,0 +1,1117 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/wonhee2"))()
+
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/dothedanceintro"))()
+end)
+
+-- Rayfield
+local success, Rayfield = pcall(function()
+    return loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+end)
+if not success then
+    warn("Lỗi khi tải Rayfield: " .. tostring(Rayfield))
+    return
+end
+
+-- Window
+local Window = Rayfield:CreateWindow({
+    Name = "AduEmCuong",
+    LoadingTitle = "WonHee",
+    LoadingSubtitle = "by cuong",
+    ConfigurationSaving = {
+        Enabled = false,
+    }
+})
+
+-- tab Char
+local SupportTab = Window:CreateTab("Character")
+
+SupportTab:CreateInput({
+    Name = "TpWalk",
+    PlaceholderText = "EnterNumber",
+    RemoveTextAfterFocusLost = false,
+
+    Callback = function(Value)
+        local Number = tonumber(Value)
+
+        if not Number then
+            warn("Please enter a valid number!")
+            return
+        end
+
+        if not TpWalk then
+            local success, result = pcall(function()
+                TpWalk = loadstring(game:HttpGet(
+                    "https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/TpWalk"
+                ))()
+            end)
+
+            if not success then
+                warn("Lỗi khi tải TpWalk: " .. tostring(result))
+                TpWalk = nil
+                return
+            end
+        end
+
+        local success, result = pcall(function()
+            TpWalk(Number)
+        end)
+
+        if not success then
+            warn("Lỗi khi thay đổi TpWalk: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "Infjump",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/infjump"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải Infjump: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "TpTool",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/TpTool"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải TpTool: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "NoClip",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/Noclip"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải NoClip: " .. tostring(result))
+        end
+    end,
+})
+
+-- Tab PvP
+local SupportTab = Window:CreateTab("pvp")
+
+SupportTab:CreateButton({
+    Name = "Aimnpc",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/Aimnpc"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải Aimnpc: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "aimplayer",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/Aimplayer"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải aimplayer: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "FLing",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/fling"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải Fling: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "FLingNoclip",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/flingnoclip"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải FlingNoclip: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "AntiFling",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/antifling"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải AntiFling: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateInput({
+    Name = "GotoPlr",
+    PlaceholderText = "Enter username...",
+    RemoveTextAfterFocusLost = false,
+
+    Callback = function(Value)
+        local Text = tostring(Value):match("^%s*(.-)%s*$")
+
+        if Text == "" then
+            warn("Please enter a player name!")
+            return
+        end
+
+        if not GotoPlr then
+            local success, result = pcall(function()
+                GotoPlr = loadstring(game:HttpGet(
+                    "https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/gotoplr"
+                ))()
+            end)
+
+            if not success or type(GotoPlr) ~= "function" then
+                warn("Lỗi khi tải GotoPlr: " .. tostring(result))
+                GotoPlr = nil
+                return
+            end
+        end
+
+        -- Tìm player theo một phần Username, không phân biệt hoa/thường
+        local target = nil
+        local search = Text:lower()
+
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            if player.Name:lower():find(search, 1, true) then
+                target = player
+                break
+            end
+        end
+
+        if not target then
+            warn("Không tìm thấy player: " .. Text)
+            return
+        end
+
+        local success, result = pcall(function()
+            return GotoPlr(
+                game:GetService("Players").LocalPlayer,
+                target.Name,
+                true
+            )
+        end)
+
+        if not success then
+            warn("Lỗi khi teleport: " .. tostring(result))
+        elseif result == false then
+            warn("GotoPlr không thể teleport tới player này.")
+        end
+    end,
+})
+
+SupportTab:CreateInput({
+    Name = "HitboxHead",
+    PlaceholderText = "EnterNumber...",
+    RemoveTextAfterFocusLost = false,
+
+    Callback = function(Value)
+        local Number = tonumber(Value)
+
+        if not Number then
+            warn("Please enter a valid number!")
+            return
+        end
+
+        if not HitboxHead then
+            local success, result = pcall(function()
+                HitboxHead = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/HitboxHead"))()
+            end)
+
+            if not success then
+                warn("Lỗi khi tải HitboxHead: " .. tostring(result))
+                HitboxHead = nil
+                return
+            end
+        end
+
+        local success, result = pcall(function()
+            HitboxHead(Number)
+        end)
+
+        if not success then
+            warn("Lỗi khi thay đổi HitboxHead: " .. tostring(result))
+        end
+    end,
+})
+
+--tab More
+local SupportTab = Window:CreateTab("More")
+
+SupportTab:CreateButton({
+    Name = "FullBright",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/fullbright"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải FullBright: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "EspMonter",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/CTN.A/refs/heads/main/Espmonter"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải EspMonter: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "Open Console",
+    Callback = function()
+        pcall(function()
+            game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F9, false, game)
+            task.wait()
+            game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.F9, false, game)
+        end)
+    end
+})
+
+SupportTab:CreateButton({
+    Name = "Instant",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/Instant"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải Instant: " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "antilag",
+    Callback = function()
+        local success, result = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/antilag"))()
+        end)
+        if not success then
+            warn("Lỗi khi tải antilag: " .. tostring(result))
+        end
+    end,
+})
+
+-- tab music
+local SupportTab = Window:CreateTab("Music")
+
+local MusicSound = nil
+
+SupportTab:CreateButton({
+    Name = "Magnetic",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/magnetic"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải Magnetic: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "DoTheDance",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/dothedance"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải DoTheDance: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "NotCuteAnymore",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/notcuteanymore"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải NotCuteAnymore: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "Jellyous",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/jellyous"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải Jellyous: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "Whiplash",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Whiplash"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải Whiplash: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "TickTack",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/TickTack"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải TickTack: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "SUGARHONEYICETEA",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/SUGARHONEYICETEA"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải SUGARHONEYICETEA: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "PerfectNight",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/PerfectNight"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải PerfectNight: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "LuckyGirlSyndrome",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/LuckyGirlSyndrome"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải LuckyGirlSyndrome: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "LEMONADE",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/LEMONADE"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải LEMONADE: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "CatchCatch",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/CatchCatch"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải CatchCatch: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "Cherish",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Cherish"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải Cherish: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "ICONICBYMISTAKE",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/ICONICBYMISTAKE"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải ICONICBYMISTAKE: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "It'sMe",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/It'sMe"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải It'sMe: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "RockThatBody",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/rockthatbody"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải SWM: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "IThoughtISawThisFaceToday",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/ithoughtisawthisfacetoday"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải : " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "IllusionarydaytimexTrackmaker",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Illusionarydaytimextrackmaker"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải ilu: " .. tostring(result))
+        end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "SupernovaLove",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/supernovalove"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải : " .. tostring(result))
+        end
+    end,
+})
+
+SupportTab:CreateButton({
+    Name = "LoveOptions",
+    Callback = function()
+        if MusicSound then
+            pcall(function() MusicSound:Stop() MusicSound:Destroy() end)
+            MusicSound = nil
+            return
+        end
+        local ok, res = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/loveoptions")))
+        MusicSound = ok and res or nil
+        if not ok then warn("Lỗi khi tải : " .. tostring(res)) end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "FallenAngel",
+    Callback = function()
+        if MusicSound then
+            pcall(function() MusicSound:Stop() MusicSound:Destroy() end)
+            MusicSound = nil
+            return
+        end
+        local ok, res = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/fallenangel")))
+        MusicSound = ok and res or nil
+        if not ok then warn("Lỗi khi tải : " .. tostring(res)) end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "Miniskirt",
+    Callback = function()
+        if MusicSound then
+            pcall(function() MusicSound:Stop() MusicSound:Destroy() end)
+            MusicSound = nil
+            return
+        end
+        local ok, res = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/miniskirt")))
+        MusicSound = ok and res or nil
+        if not ok then warn("Lỗi khi tải : " .. tostring(res)) end
+    end,
+})
+
+
+SupportTab:CreateButton({
+    Name = "You(=i)",
+    Callback = function()
+        if MusicSound then
+            pcall(function() MusicSound:Stop() MusicSound:Destroy() end)
+            MusicSound = nil
+            return
+        end
+        local ok, res = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/you(=i)")))
+        MusicSound = ok and res or nil
+        if not ok then warn("Lỗi khi tải : " .. tostring(res)) end
+    end,
+})
+
+
+
+
+local MainTab = Window:CreateTab("Fly")
+
+-- Vars
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local flying = false
+local speeds = 1              -- số luồng translate / cũng là cơ bản cho tốc độ
+local speedValue = 1          -- tốc độ dùng cho BV
+local tpwalking = false
+local nowe = false
+
+local ascendToggle = false    -- toggle UI
+local descendToggle = false
+local ascendHold = false      -- giữ phím (E)
+local descendHold = false     -- giữ phím (Q)
+
+local flyBG, flyBV, flyRenderConn
+
+-- Helper: trạng thái ascend thực sự
+local function isAscending()
+	return ascendToggle or ascendHold
+end
+local function isDescending()
+	return descendToggle or descendHold
+end
+
+-- Start/Stop translate threads (giữ nguyên logic gốc)
+local function startTranslateThreads()
+	tpwalking = true
+	for i = 1, speeds do
+		task.spawn(function()
+			local hb = RunService.Heartbeat
+			local char = LocalPlayer.Character
+			local hum = char and char:FindFirstChildWhichIsA("Humanoid")
+			while tpwalking and hb:Wait() and char and hum and hum.Parent do
+				if hum.MoveDirection.Magnitude > 0 then
+					-- dịch chuyển dựa trên MoveDirection (hài hòa với camera)
+					char:TranslateBy(hum.MoveDirection)
+				end
+			end
+		end)
+	end
+end
+
+local function stopTranslateThreads()
+	tpwalking = false
+end
+
+--Fly
+local function enableFly()
+	local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if not hum then return end
+
+	nowe = true
+	-- start translate threads
+	startTranslateThreads()
+
+	-- disable animate + freeze play speed
+	if char:FindFirstChild("Animate") then
+		char.Animate.Disabled = true
+	end
+	local Hum = char:FindFirstChildOfClass("Humanoid") or char:FindFirstChildOfClass("AnimationController")
+	if Hum then
+		for _, v in next, Hum:GetPlayingAnimationTracks() do
+			v:AdjustSpeed(0)
+		end
+	end
+
+	-- disable 
+	local disableStates = {
+		Enum.HumanoidStateType.Climbing,
+		Enum.HumanoidStateType.FallingDown,
+		Enum.HumanoidStateType.Flying,
+		Enum.HumanoidStateType.Freefall,
+		Enum.HumanoidStateType.GettingUp,
+		Enum.HumanoidStateType.Jumping,
+		Enum.HumanoidStateType.Landed,
+		Enum.HumanoidStateType.Physics,
+		Enum.HumanoidStateType.PlatformStanding,
+		Enum.HumanoidStateType.Ragdoll,
+		Enum.HumanoidStateType.Running,
+		Enum.HumanoidStateType.RunningNoPhysics,
+		Enum.HumanoidStateType.Seated,
+		Enum.HumanoidStateType.StrafingNoPhysics,
+		Enum.HumanoidStateType.Swimming
+	}
+	for _, st in ipairs(disableStates) do
+		pcall(function() hum:SetStateEnabled(st, false) end)
+	end
+	pcall(function() hum:ChangeState(Enum.HumanoidStateType.Swimming) end)
+
+	local jointPart
+	if hum.RigType == Enum.HumanoidRigType.R6 then
+		jointPart = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("HumanoidRootPart")
+	else
+		jointPart = char:FindFirstChild("UpperTorso") or char:FindFirstChild("HumanoidRootPart")
+	end
+	if not jointPart then jointPart = char:FindFirstChildWhichIsA("BasePart") end
+
+	flyBG = Instance.new("BodyGyro")
+	flyBG.P = 9e4
+	flyBG.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+	flyBG.CFrame = jointPart.CFrame
+	flyBG.Parent = jointPart
+
+	flyBV = Instance.new("BodyVelocity")
+	flyBV.Velocity = Vector3.new(0, 0.1, 0)
+	flyBV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+	flyBV.Parent = jointPart
+
+	--
+	flyRenderConn = RunService.RenderStepped:Connect(function()
+		if not nowe then return end
+		local cam = workspace.CurrentCamera
+		local moveDir = hum.MoveDirection or Vector3.new(0,0,0)
+		local mov = Vector3.new(0,0,0)
+		if moveDir.Magnitude > 0 then
+			--  camera: forward/back + right/left
+			mov = (cam.CFrame.LookVector * moveDir.Z + cam.CFrame.RightVector * moveDir.X) * speedValue
+		end
+
+		-- vertical velocity to toggle
+		local vert = 0
+		if isAscending() then vert = speedValue end
+		if isDescending() then vert = -speedValue end
+
+		-- set velocity
+		if flyBV and flyBV.Parent then
+			flyBV.Velocity = mov + Vector3.new(0, vert, 0)
+		end
+
+		--  orientation 
+		if flyBG and flyBG.Parent then
+			flyBG.CFrame = cam.CFrame * CFrame.Angles(-math.rad((moveDir.Z) * 50 * (speedValue/50)), 0, 0)
+		end
+	end)
+end
+
+-- off fly
+local function disableFly()
+	nowe = false
+	stopTranslateThreads()
+
+	-- disconnect render + destroy BV/BG
+	if flyRenderConn then
+		flyRenderConn:Disconnect()
+		flyRenderConn = nil
+	end
+	if flyBG then
+		pcall(function() flyBG:Destroy() end)
+		flyBG = nil
+	end
+	if flyBV then
+		pcall(function() flyBV:Destroy() end)
+		flyBV = nil
+	end
+
+	local char = LocalPlayer.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if hum then
+		for _, st in ipairs(Enum.HumanoidStateType:GetEnumItems()) do
+			pcall(function() hum:SetStateEnabled(st, true) end)
+		end
+		pcall(function() hum:ChangeState(Enum.HumanoidStateType.RunningNoPhysics) end)
+	end
+
+	-- enable animate
+	if char and char:FindFirstChild("Animate") then
+		char.Animate.Disabled = false
+	end
+end
+
+-- UI: Toggle Fly
+MainTab:CreateToggle({
+	Name = "Fly",
+	CurrentValue = false,
+	Flag = "FlyToggle",
+	Callback = function(Value)
+		flying = Value
+		if Value then
+			enableFly()
+		else
+			disableFly()
+		end
+	end,
+})
+
+-- UI: Slider tốc độ
+MainTab:CreateSlider({
+	Name = "Speed  *note:When adjusting the speed, restart the flight to avoid errors.  ",
+	Range = {1, 20},
+	Increment = 1,
+	CurrentValue = speedValue,
+	Flag = "FlySpeed",
+	Callback = function(Value)
+		speedValue = Value
+		speeds = math.max(1, math.floor(Value)) -- giữ gần giống GUI gốc: số luồng = speeds
+		if nowe then
+			stopTranslateThreads()
+			startTranslateThreads()
+		end
+	end,
+})
+
+-- UI: Toggle Ascend / Descend
+MainTab:CreateToggle({
+	Name = "Up",
+	CurrentValue = false,
+	Flag = "AscendToggle",
+	Callback = function(Value)
+		ascendToggle = Value
+	end,
+})
+MainTab:CreateToggle({
+	Name = "Down",
+	CurrentValue = false,
+	Flag = "DescendToggle",
+	Callback = function(Value)
+		descendToggle = Value
+	end,
+})
+
+-- Keybind: giữ E để lên, giữ Q để xuống (như behavior "press and hold")
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.E then
+			ascendHold = true
+		elseif input.KeyCode == Enum.KeyCode.Q then
+			descendHold = true
+		end
+	end
+end)
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Enum.KeyCode.E then
+			ascendHold = false
+		elseif input.KeyCode == Enum.KeyCode.Q then
+			descendHold = false
+		end
+	end
+end)
+
+-- Reset on respawn
+Players.LocalPlayer.CharacterAdded:Connect(function(char)
+	-- đảm bảo tắt lại nếu die / respawn
+	nowe = false
+	tpwalking = false
+	if flyRenderConn then
+		flyRenderConn:Disconnect()
+		flyRenderConn = nil
+	end
+	if flyBG then pcall(function() flyBG:Destroy() end) flyBG = nil end
+	if flyBV then pcall(function() flyBV:Destroy() end) flyBV = nil end
+	-- enable animate nếu bị tắt
+	if char:FindFirstChild("Animate") then
+		char.Animate.Disabled = false
+	end
+end)
