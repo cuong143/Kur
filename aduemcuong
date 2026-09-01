@@ -435,7 +435,7 @@ local function PlayMusic(Index)
 end
 
 --------------------------------------------------
--- TẠO BUTTON + THÊM VÀO PLAYLIST
+-- BUTTON +add PLAYLIST
 --------------------------------------------------
 
 local function AddMusic(Name)
@@ -460,8 +460,8 @@ local function AddMusic(Name)
 end
 
 --------------------------------------------------
--- DANH SÁCH NHẠC
--- Giờ chỉ cần nhập tên file (không cần đuôi, không cần URL)
+-- list
+-- add name file 
 --------------------------------------------------
 
 AddMusic("Magnetic")
