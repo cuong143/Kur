@@ -284,6 +284,13 @@ SupportTab:CreateButton({
 })
 
 SupportTab:CreateButton({
+    Name = "Open Console",
+    Callback = function()
+        game:GetService("StarterGui"):SetCore("DevConsoleVisible", true)
+    end
+})
+
+SupportTab:CreateButton({
     Name = "Instant",
     Callback = function()
         local success, result = pcall(function()
