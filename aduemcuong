@@ -325,17 +325,17 @@ local SupportTab = Window:CreateTab("Music")
 SupportTab:CreateButton({
     Name = "Clear Music Cache",
     Callback = function()
-        StopMusic()
+        pcall(function()
+            StopMusic()
 
-        for _, music in ipairs(MusicList) do
-            local FileName = music.Name .. ".mp3"
+            for _, music in ipairs(MusicList) do
+                local FileName = music.Name .. ".mp3"
 
-            if isfile(FileName) then
-                pcall(function()
+                if isfile(FileName) then
                     delfile(FileName)
-                end)
+                end
             end
-        end
+        end)
     end,
 })
 
