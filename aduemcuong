@@ -804,8 +804,9 @@ SupportTab:CreateButton({
     end,
 })
 
+
 SupportTab:CreateButton({
-    Name = "staywithme",
+    Name = "StayWithMe",
     Callback = function()
         if MusicSound then
             pcall(function() MusicSound:Stop() MusicSound:Destroy() end)
