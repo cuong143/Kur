@@ -318,8 +318,29 @@ SupportTab:CreateButton({
     end,
 })
 
+
 -- tab music
 local SupportTab = Window:CreateTab("Music")
+
+SupportTab:CreateButton({
+    Name = "Clear Music Cache",
+    Callback = function()
+        StopMusic()
+
+        for _, music in ipairs(MusicList) do
+            local FileName = music.Name .. ".mp3"
+
+            if isfile(FileName) then
+                pcall(function()
+                    delfile(FileName)
+                end)
+            end
+        end
+    end,
+})
+
+
+local BaseUrl = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/"
 
 local MusicSound = nil
 local MusicIndex = 0
@@ -341,71 +362,61 @@ local function StopMusic()
             MusicSound:Stop()
             MusicSound:Destroy()
         end)
-
         MusicSound = nil
     end
 end
-
 
 local function PlayMusic(Index)
     if not MusicList[Index] then
         Index = 1
     end
 
-    -- Dừng bài hiện tại
     if MusicSound then
         pcall(function()
             MusicSound:Stop()
             MusicSound:Destroy()
         end)
-
         MusicSound = nil
     end
 
     MusicIndex = Index
     MusicPlaying = true
 
-    -- Token để bỏ qua Ended của Sound cũ
     PlayToken = PlayToken + 1
     local MyToken = PlayToken
 
     local music = MusicList[Index]
+    local FileName = music.Name .. ".mp3"
 
-    local success, result = pcall(function()
-        return loadstring(game:HttpGet(music.Url))()
+    local success, err = pcall(function()
+        if not isfile(FileName) then
+            writefile(FileName, game:HttpGet(music.Url))
+        end
     end)
 
     if not success then
-        warn("Lỗi khi tải " .. music.Name .. ": " .. tostring(result))
-        MusicSound = nil
+        warn("Lỗi khi tải " .. music.Name .. ": " .. tostring(err))
 
-        -- Nếu tải lỗi thì thử bài tiếp theo
         if MusicPlaying and MyToken == PlayToken then
             local NextIndex = Index + 1
-
             if NextIndex > #MusicList then
                 NextIndex = 1
             end
-
             PlayMusic(NextIndex)
         end
-
         return
     end
 
-    MusicSound = result
+    local sound = Instance.new("Sound")
+    sound.SoundId = getcustomasset(FileName)
+    sound.Volume = 6
+    sound.Looped = false
+    sound.Parent = game:GetService("SoundService")
+    sound:Play()
 
-    if not MusicSound then
-        warn("File " .. music.Name .. " không trả về Sound.")
-        return
-    end
-
-    -- File nhạc của bạn đang để Looped = true.
-    -- Không cần sửa từng file, sửa trực tiếp ở đây.
-    MusicSound.Looped = false
+    MusicSound = sound
 
     MusicSound.Ended:Connect(function()
-        -- Không xử lý Ended của bài cũ
         if not MusicPlaying then
             return
         end
@@ -415,7 +426,6 @@ local function PlayMusic(Index)
         end
 
         local NextIndex = MusicIndex + 1
-
         if NextIndex > #MusicList then
             NextIndex = 1
         end
@@ -424,14 +434,13 @@ local function PlayMusic(Index)
     end)
 end
 
-
 --------------------------------------------------
 -- TẠO BUTTON + THÊM VÀO PLAYLIST
 --------------------------------------------------
 
-local function AddMusic(Name, Url)
-
+local function AddMusic(Name)
     local Index = #MusicList + 1
+    local Url = BaseUrl .. Name .. ".mp3"
 
     MusicList[Index] = {
         Name = Name,
@@ -440,136 +449,46 @@ local function AddMusic(Name, Url)
 
     SupportTab:CreateButton({
         Name = Name,
-
         Callback = function()
-
-            -- Bấm lại bài đang phát = tắt
             if MusicPlaying and MusicIndex == Index then
                 StopMusic()
                 return
             end
-
-            -- Bấm bài khác = chuyển sang bài đó
             PlayMusic(Index)
         end,
     })
 end
 
-
 --------------------------------------------------
 -- DANH SÁCH NHẠC
--- Thứ tự ở đây chính là thứ tự tự chuyển bài
+-- Giờ chỉ cần nhập tên file (không cần đuôi, không cần URL)
 --------------------------------------------------
 
-AddMusic(
-    "Magnetic",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/magnetic"
-)
+AddMusic("Magnetic")
+AddMusic("DoTheDance")
+AddMusic("NotCuteAnymore")
+AddMusic("Jellyous")
+AddMusic("Whiplash")
+AddMusic("TickTack")
+AddMusic("SUGARHONEYICETEA")
+AddMusic("PerfectNight")
+AddMusic("LuckyGirlSyndrome")
+AddMusic("LEMONADE")
+AddMusic("CatchCatch")
+AddMusic("Cherish")
+AddMusic("ICONICBYMISTAKE")
+AddMusic("It'sMe")
+AddMusic("RockThatBody")
+AddMusic("IThoughtISawThisFaceToday")
+AddMusic("IllusionarydaytimexTrackmaker")
+AddMusic("SupernovaLove")
+AddMusic("LoveOptions")
+AddMusic("FallenAngel")
+AddMusic("Miniskirt")
+AddMusic("You(=i)")
 
-AddMusic(
-    "DoTheDance",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/dothedance"
-)
 
-AddMusic(
-    "NotCuteAnymore",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/notcuteanymore"
-)
 
-AddMusic(
-    "Jellyous",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/jellyous"
-)
-
-AddMusic(
-    "Whiplash",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Whiplash"
-)
-
-AddMusic(
-    "TickTack",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/TickTack"
-)
-
-AddMusic(
-    "SUGARHONEYICETEA",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/SUGARHONEYICETEA"
-)
-
-AddMusic(
-    "PerfectNight",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/PerfectNight"
-)
-
-AddMusic(
-    "LuckyGirlSyndrome",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/LuckyGirlSyndrome"
-)
-
-AddMusic(
-    "LEMONADE",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/LEMONADE"
-)
-
-AddMusic(
-    "CatchCatch",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/CatchCatch"
-)
-
-AddMusic(
-    "Cherish",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Cherish"
-)
-
-AddMusic(
-    "ICONICBYMISTAKE",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/ICONICBYMISTAKE"
-)
-
-AddMusic(
-    "It'sMe",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/It'sMe"
-)
-
-AddMusic(
-    "RockThatBody",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/rockthatbody"
-)
-
-AddMusic(
-    "IThoughtISawThisFaceToday",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/ithoughtisawthisfacetoday"
-)
-
-AddMusic(
-    "IllusionarydaytimexTrackmaker",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Illusionarydaytimextrackmaker"
-)
-
-AddMusic(
-    "SupernovaLove",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/supernovalove"
-)
-
-AddMusic(
-    "LoveOptions",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/loveoptions"
-)
-
-AddMusic(
-    "FallenAngel",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/fallenangel"
-)
-
-AddMusic(
-    "Miniskirt",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/miniskirt"
-)
-
-AddMusic(
-    "You(=i)",
-    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/you(=i)"
-)
 
 
 
