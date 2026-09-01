@@ -322,533 +322,254 @@ SupportTab:CreateButton({
 local SupportTab = Window:CreateTab("Music")
 
 local MusicSound = nil
+local MusicIndex = 0
+local MusicPlaying = false
+local PlayToken = 0
 
-SupportTab:CreateButton({
-    Name = "Magnetic",
-    Callback = function()
+local MusicList = {}
 
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
+--------------------------------------------------
+-- MUSIC SYSTEM
+--------------------------------------------------
 
-            MusicSound = nil
-            return
-        end
+local function StopMusic()
+    MusicPlaying = false
+    PlayToken = PlayToken + 1
 
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/magnetic"))()
+    if MusicSound then
+        pcall(function()
+            MusicSound:Stop()
+            MusicSound:Destroy()
         end)
 
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải Magnetic: " .. tostring(result))
-        end
-    end,
-})
+        MusicSound = nil
+    end
+end
 
 
-SupportTab:CreateButton({
-    Name = "DoTheDance",
-    Callback = function()
+local function PlayMusic(Index)
+    if not MusicList[Index] then
+        Index = 1
+    end
 
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/dothedance"))()
+    -- Dừng bài hiện tại
+    if MusicSound then
+        pcall(function()
+            MusicSound:Stop()
+            MusicSound:Destroy()
         end)
 
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải DoTheDance: " .. tostring(result))
-        end
-    end,
-})
+        MusicSound = nil
+    end
 
+    MusicIndex = Index
+    MusicPlaying = true
 
-SupportTab:CreateButton({
-    Name = "NotCuteAnymore",
-    Callback = function()
+    -- Token để bỏ qua Ended của Sound cũ
+    PlayToken = PlayToken + 1
+    local MyToken = PlayToken
 
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
+    local music = MusicList[Index]
+
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet(music.Url))()
+    end)
+
+    if not success then
+        warn("Lỗi khi tải " .. music.Name .. ": " .. tostring(result))
+        MusicSound = nil
+
+        -- Nếu tải lỗi thì thử bài tiếp theo
+        if MusicPlaying and MyToken == PlayToken then
+            local NextIndex = Index + 1
+
+            if NextIndex > #MusicList then
+                NextIndex = 1
             end
 
-            MusicSound = nil
+            PlayMusic(NextIndex)
+        end
+
+        return
+    end
+
+    MusicSound = result
+
+    if not MusicSound then
+        warn("File " .. music.Name .. " không trả về Sound.")
+        return
+    end
+
+    -- File nhạc của bạn đang để Looped = true.
+    -- Không cần sửa từng file, sửa trực tiếp ở đây.
+    MusicSound.Looped = false
+
+    MusicSound.Ended:Connect(function()
+        -- Không xử lý Ended của bài cũ
+        if not MusicPlaying then
             return
         end
 
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/notcuteanymore"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải NotCuteAnymore: " .. tostring(result))
+        if MyToken ~= PlayToken then
+            return
         end
-    end,
-})
+
+        local NextIndex = MusicIndex + 1
+
+        if NextIndex > #MusicList then
+            NextIndex = 1
+        end
+
+        PlayMusic(NextIndex)
+    end)
+end
 
 
-SupportTab:CreateButton({
-    Name = "Jellyous",
-    Callback = function()
+--------------------------------------------------
+-- TẠO BUTTON + THÊM VÀO PLAYLIST
+--------------------------------------------------
 
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
+local function AddMusic(Name, Url)
+
+    local Index = #MusicList + 1
+
+    MusicList[Index] = {
+        Name = Name,
+        Url = Url
+    }
+
+    SupportTab:CreateButton({
+        Name = Name,
+
+        Callback = function()
+
+            -- Bấm lại bài đang phát = tắt
+            if MusicPlaying and MusicIndex == Index then
+                StopMusic()
+                return
             end
 
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/jellyous"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải Jellyous: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "Whiplash",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Whiplash"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải Whiplash: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "TickTack",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/TickTack"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải TickTack: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "SUGARHONEYICETEA",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/SUGARHONEYICETEA"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải SUGARHONEYICETEA: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "PerfectNight",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/PerfectNight"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải PerfectNight: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "LuckyGirlSyndrome",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/LuckyGirlSyndrome"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải LuckyGirlSyndrome: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "LEMONADE",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/LEMONADE"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải LEMONADE: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "CatchCatch",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/CatchCatch"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải CatchCatch: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "Cherish",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Cherish"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải Cherish: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "ICONICBYMISTAKE",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/ICONICBYMISTAKE"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải ICONICBYMISTAKE: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "It'sMe",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/It'sMe"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải It'sMe: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "RockThatBody",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/rockthatbody"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải SWM: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "IThoughtISawThisFaceToday",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/ithoughtisawthisfacetoday"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải : " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "IllusionarydaytimexTrackmaker",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Illusionarydaytimextrackmaker"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải ilu: " .. tostring(result))
-        end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "SupernovaLove",
-    Callback = function()
-
-        if MusicSound then
-            if MusicSound.Parent then
-                MusicSound:Stop()
-                MusicSound:Destroy()
-            end
-
-            MusicSound = nil
-            return
-        end
-
-        local success, result = pcall(function()
-            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/supernovalove"))()
-        end)
-
-        if not success then
-            MusicSound = nil
-            warn("Lỗi khi tải : " .. tostring(result))
-        end
-    end,
-})
-
-SupportTab:CreateButton({
-    Name = "LoveOptions",
-    Callback = function()
-        if MusicSound then
-            pcall(function() MusicSound:Stop() MusicSound:Destroy() end)
-            MusicSound = nil
-            return
-        end
-        local ok, res = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/loveoptions")))
-        MusicSound = ok and res or nil
-        if not ok then warn("Lỗi khi tải : " .. tostring(res)) end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "FallenAngel",
-    Callback = function()
-        if MusicSound then
-            pcall(function() MusicSound:Stop() MusicSound:Destroy() end)
-            MusicSound = nil
-            return
-        end
-        local ok, res = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/fallenangel")))
-        MusicSound = ok and res or nil
-        if not ok then warn("Lỗi khi tải : " .. tostring(res)) end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "Miniskirt",
-    Callback = function()
-        if MusicSound then
-            pcall(function() MusicSound:Stop() MusicSound:Destroy() end)
-            MusicSound = nil
-            return
-        end
-        local ok, res = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/miniskirt")))
-        MusicSound = ok and res or nil
-        if not ok then warn("Lỗi khi tải : " .. tostring(res)) end
-    end,
-})
-
-
-SupportTab:CreateButton({
-    Name = "You(=i)",
-    Callback = function()
-        if MusicSound then
-            pcall(function() MusicSound:Stop() MusicSound:Destroy() end)
-            MusicSound = nil
-            return
-        end
-        local ok, res = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/you(=i)")))
-        MusicSound = ok and res or nil
-        if not ok then warn("Lỗi khi tải : " .. tostring(res)) end
-    end,
-})
-
+            -- Bấm bài khác = chuyển sang bài đó
+            PlayMusic(Index)
+        end,
+    })
+end
+
+
+--------------------------------------------------
+-- DANH SÁCH NHẠC
+-- Thứ tự ở đây chính là thứ tự tự chuyển bài
+--------------------------------------------------
+
+AddMusic(
+    "Magnetic",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/magnetic"
+)
+
+AddMusic(
+    "DoTheDance",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/dothedance"
+)
+
+AddMusic(
+    "NotCuteAnymore",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/notcuteanymore"
+)
+
+AddMusic(
+    "Jellyous",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/jellyous"
+)
+
+AddMusic(
+    "Whiplash",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Whiplash"
+)
+
+AddMusic(
+    "TickTack",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/TickTack"
+)
+
+AddMusic(
+    "SUGARHONEYICETEA",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/SUGARHONEYICETEA"
+)
+
+AddMusic(
+    "PerfectNight",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/PerfectNight"
+)
+
+AddMusic(
+    "LuckyGirlSyndrome",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/LuckyGirlSyndrome"
+)
+
+AddMusic(
+    "LEMONADE",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/LEMONADE"
+)
+
+AddMusic(
+    "CatchCatch",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/CatchCatch"
+)
+
+AddMusic(
+    "Cherish",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Cherish"
+)
+
+AddMusic(
+    "ICONICBYMISTAKE",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/ICONICBYMISTAKE"
+)
+
+AddMusic(
+    "It'sMe",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/It'sMe"
+)
+
+AddMusic(
+    "RockThatBody",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/rockthatbody"
+)
+
+AddMusic(
+    "IThoughtISawThisFaceToday",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/ithoughtisawthisfacetoday"
+)
+
+AddMusic(
+    "IllusionarydaytimexTrackmaker",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Illusionarydaytimextrackmaker"
+)
+
+AddMusic(
+    "SupernovaLove",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/supernovalove"
+)
+
+AddMusic(
+    "LoveOptions",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/loveoptions"
+)
+
+AddMusic(
+    "FallenAngel",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/fallenangel"
+)
+
+AddMusic(
+    "Miniskirt",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/miniskirt"
+)
+
+AddMusic(
+    "You(=i)",
+    "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/you(=i)"
+)
 
 
 
