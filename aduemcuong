@@ -819,6 +819,24 @@ SupportTab:CreateButton({
     end,
 })
 
+SupportTab:CreateButton({
+    Name = "Miniskirt",
+    Callback = function()
+        if MusicSound then
+            pcall(function() MusicSound:Stop() MusicSound:Destroy() end)
+            MusicSound = nil
+            return
+        end
+        local ok, res = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/miniskirt")))
+        MusicSound = ok and res or nil
+        if not ok then warn("Lỗi khi tải : " .. tostring(res)) end
+    end,
+})
+
+
+
+
+
 
 
 local MainTab = Window:CreateTab("Fly")
