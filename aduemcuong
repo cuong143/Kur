@@ -748,11 +748,36 @@ SupportTab:CreateButton({
 
         if not success then
             MusicSound = nil
-            warn("Lỗi khi tải : " .. tostring(result))
+            warn("Lỗi khi tải ilu: " .. tostring(result))
         end
     end,
 })
 
+
+SupportTab:CreateButton({
+    Name = "LoveOptions",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/loveoptions"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải : " .. tostring(result))
+        end
+    end,
+})
 
 
 
