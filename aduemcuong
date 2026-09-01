@@ -715,6 +715,62 @@ SupportTab:CreateButton({
     end,
 })
 
+local MusicSound = nil
+
+SupportTab:CreateButton({
+    Name = "IThoughtISawThisFaceToday",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/ithoughtisawthisfacetoday"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải : " .. tostring(result))
+        end
+    end,
+})
+
+local MusicSound = nil
+
+SupportTab:CreateButton({
+    Name = "IllusionarydaytimexTrackmaker",
+    Callback = function()
+
+        if MusicSound then
+            if MusicSound.Parent then
+                MusicSound:Stop()
+                MusicSound:Destroy()
+            end
+
+            MusicSound = nil
+            return
+        end
+
+        local success, result = pcall(function()
+            MusicSound = loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/Illusionarydaytimextrackmaker"))()
+        end)
+
+        if not success then
+            MusicSound = nil
+            warn("Lỗi khi tải : " .. tostring(result))
+        end
+    end,
+})
+
+
+
 
 local MainTab = Window:CreateTab("Fly")
 
