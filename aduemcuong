@@ -284,9 +284,13 @@ SupportTab:CreateButton({
 })
 
 SupportTab:CreateButton({
-    Name = "Console",
+    Name = "Open Console",
     Callback = function()
-        game:GetService("StarterGui"):SetCore("DevConsoleVisible", true)
+        pcall(function()
+            game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.F9, false, game)
+            task.wait()
+            game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.F9, false, game)
+        end)
     end
 })
 
