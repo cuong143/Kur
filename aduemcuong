@@ -841,7 +841,7 @@ SupportTab:CreateButton({
         end
         local ok, res = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/fallenangel")))
         MusicSound = ok and res or nil
-        if not ok then warn("Lỗi khi tải fallenangel: " .. tostring(res)) end
+        if not ok then warn("Lỗi khi tải : " .. tostring(res)) end
     end,
 })
 
