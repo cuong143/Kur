@@ -337,7 +337,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "DoTheDance",
@@ -364,7 +363,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "NotCuteAnymore",
@@ -391,7 +389,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "Jellyous",
@@ -418,7 +415,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "Whiplash",
@@ -445,7 +441,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "TickTack",
@@ -472,7 +467,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "SUGARHONEYICETEA",
@@ -499,7 +493,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "PerfectNight",
@@ -526,7 +519,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "LuckyGirlSyndrome",
@@ -553,7 +545,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "LEMONADE",
@@ -580,7 +571,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "CatchCatch",
@@ -607,7 +597,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "Cherish",
@@ -634,7 +623,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "ICONICBYMISTAKE",
@@ -661,7 +649,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "It'sMe",
@@ -688,7 +675,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "RockThatBody",
@@ -715,7 +701,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "IThoughtISawThisFaceToday",
@@ -742,7 +727,6 @@ SupportTab:CreateButton({
     end,
 })
 
-local MusicSound = nil
 
 SupportTab:CreateButton({
     Name = "IllusionarydaytimexTrackmaker",
