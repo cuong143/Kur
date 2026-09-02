@@ -252,6 +252,46 @@ SupportTab:CreateInput({
     end,
 })
 
+local HitboxHead = nil
+
+SupportTab:CreateInput({
+    Name = "HitboxNpc",
+    PlaceholderText = "EnterNumber...",
+    RemoveTextAfterFocusLost = false,
+
+    Callback = function(Value)
+        local Number = tonumber(Value)
+
+        if not Number then
+            warn("Please enter a valid number!")
+            return
+        end
+
+        if not HitboxHead then
+            local success, result = pcall(function()
+                HitboxHead = loadstring(game:HttpGet(
+                    "https://raw.githubusercontent.com/cuong143/Kur/refs/heads/main/hitboxnpc"
+                ))()
+            end)
+
+            if not success then
+                warn("Lỗi khi tải HitboxHead: " .. tostring(result))
+                HitboxHead = nil
+                return
+            end
+        end
+
+        local success, result = pcall(function()
+            HitboxHead(Number)
+        end)
+
+        if not success then
+            warn("Lỗi khi thay đổi HitboxHead: " .. tostring(result))
+        end
+    end,
+})
+
+
 --tab More
 local SupportTab = Window:CreateTab("More")
 
