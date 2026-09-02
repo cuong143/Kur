@@ -1,0 +1,95 @@
+-- Hitbox NPC
+local HitboxCache = {}
+
+local function GetEntities()
+    local entities = {}
+    local LocalPlayer = game:GetService("Players").LocalPlayer
+
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj ~= LocalPlayer.Character then
+            local head = obj:FindFirstChild("Head")
+            local hum = obj:FindFirstChildOfClass("Humanoid")
+
+            if head and head:IsA("BasePart") and hum then
+                table.insert(entities, obj)
+            end
+        end
+    end
+
+    return entities
+end
+
+local function ApplyHitbox(obj, size)
+    if not obj or not obj.Parent then
+        return
+    end
+
+    local head = obj:FindFirstChild("Head")
+    if not head or not head:IsA("BasePart") then
+        return
+    end
+
+    local old = HitboxCache[obj]
+
+    if old and old.Parent then
+        old.Size = Vector3.new(size, size, size)
+        return
+    end
+
+    local hb = Instance.new("Part")
+    hb.Name = "HitboxExpand"
+    hb.Size = Vector3.new(size, size, size)
+    hb.Transparency = 0.5
+    hb.CanCollide = false
+    hb.CanTouch = false
+    hb.CanQuery = true
+    hb.Massless = true
+    hb.Anchored = false
+    hb.CFrame = head.CFrame
+    hb.Color = Color3.fromRGB(255, 80, 80)
+    hb.Material = Enum.Material.ForceField
+    hb.Parent = obj
+
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = head
+    weld.Part1 = hb
+    weld.Parent = hb
+
+    HitboxCache[obj] = hb
+end
+
+local function ClearInvalid()
+    for obj, hb in pairs(HitboxCache) do
+        if not obj or not obj.Parent or not hb or not hb.Parent then
+            HitboxCache[obj] = nil
+        end
+    end
+end
+
+return function(Number)
+    Number = tonumber(Number)
+
+    if not Number then
+        return
+    end
+
+    -- 0 = tắt hitbox
+    if Number <= 0 then
+        for obj, hb in pairs(HitboxCache) do
+            pcall(function()
+                hb:Destroy()
+            end)
+        end
+
+        table.clear(HitboxCache)
+        return
+    end
+
+    Number = math.clamp(Number, 2, 30)
+
+    ClearInvalid()
+
+    for _, obj in ipairs(GetEntities()) do
+        ApplyHitbox(obj, Number)
+    end
+end
