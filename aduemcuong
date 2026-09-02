@@ -478,6 +478,15 @@ end
 AddMusic("StayWithMe9")
 AddMusic("You(=i)")
 AddMusic("IllusionarydaytimexTrackmaker")
+AddMusic("AmutolmunoUta")
+AddMusic("BadApple")
+AddMusic("CryForMe")
+AddMusic("GooseHouse")
+AddMusic("Idol")
+AddMusic("Kiichanthisiswhatfallinginlovefeelslike")
+AddMusic("Orange")
+AddMusic("Rokudenashi")
+
 
 
 --usuk
@@ -765,7 +774,7 @@ AddMusic("QueenCard")
 AddMusic("RUDE")
 AddMusic("SuperShy")
 AddMusic("WhatisLove")
-
+AddMusic("ONLY")
 
 
 local MainTab = Window:CreateTab("Fly")
