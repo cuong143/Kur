@@ -319,26 +319,271 @@ SupportTab:CreateButton({
 })
 
 
--- tab music
-local SupportTab = Window:CreateTab("Music")
+--Jpop
+local SupportTab = Window:CreateTab("JPop")
 
-SupportTab:CreateButton({
-    Name = "Clear Music Cache",
-    Callback = function()
+local BaseUrl = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/"
+
+local MusicSound = nil
+local MusicIndex = 0
+local MusicPlaying = false
+local PlayToken = 0
+
+local MusicList = {}
+
+--------------------------------------------------
+-- MUSIC SYSTEM
+--------------------------------------------------
+
+local function StopMusic()
+    MusicPlaying = false
+    PlayToken = PlayToken + 1
+
+    if MusicSound then
         pcall(function()
-            StopMusic()
-
-            for _, music in ipairs(MusicList) do
-                local FileName = music.Name .. ".mp3"
-
-                if isfile(FileName) then
-                    delfile(FileName)
-                end
-            end
+            MusicSound:Stop()
+            MusicSound:Destroy()
         end)
-    end,
-})
+        MusicSound = nil
+    end
+end
 
+local function PlayMusic(Index)
+    if not MusicList[Index] then
+        Index = 1
+    end
+
+    if MusicSound then
+        pcall(function()
+            MusicSound:Stop()
+            MusicSound:Destroy()
+        end)
+        MusicSound = nil
+    end
+
+    MusicIndex = Index
+    MusicPlaying = true
+
+    PlayToken = PlayToken + 1
+    local MyToken = PlayToken
+
+    local music = MusicList[Index]
+    local FileName = music.Name .. ".mp3"
+
+    local success, err = pcall(function()
+        if not isfile(FileName) then
+            writefile(FileName, game:HttpGet(music.Url))
+        end
+    end)
+
+    if not success then
+        warn("Lỗi khi tải " .. music.Name .. ": " .. tostring(err))
+
+        if MusicPlaying and MyToken == PlayToken then
+            local NextIndex = Index + 1
+            if NextIndex > #MusicList then
+                NextIndex = 1
+            end
+            PlayMusic(NextIndex)
+        end
+        return
+    end
+
+    local sound = Instance.new("Sound")
+    sound.SoundId = getcustomasset(FileName)
+    sound.Volume = 6
+    sound.Looped = false
+    sound.Parent = game:GetService("SoundService")
+    sound:Play()
+
+    MusicSound = sound
+
+    MusicSound.Ended:Connect(function()
+        if not MusicPlaying then
+            return
+        end
+
+        if MyToken ~= PlayToken then
+            return
+        end
+
+        local NextIndex = MusicIndex + 1
+        if NextIndex > #MusicList then
+            NextIndex = 1
+        end
+
+        PlayMusic(NextIndex)
+    end)
+end
+
+--------------------------------------------------
+-- BUTTON +add PLAYLIST
+--------------------------------------------------
+
+local function AddMusic(Name)
+    local Index = #MusicList + 1
+    local Url = BaseUrl .. Name .. ".mp3"
+
+    MusicList[Index] = {
+        Name = Name,
+        Url = Url
+    }
+
+    SupportTab:CreateButton({
+        Name = Name,
+        Callback = function()
+            if MusicPlaying and MusicIndex == Index then
+                StopMusic()
+                return
+            end
+            PlayMusic(Index)
+        end,
+    })
+end
+
+--------------------------------------------------
+-- list
+-- add name file 
+--------------------------------------------------
+
+AddMusic("StayWithMe9")
+AddMusic("You(=i)")
+AddMusic("IllusionarydaytimexTrackmaker")
+
+
+--usuk
+local SupportTab = Window:CreateTab("UsUk")
+
+local BaseUrl = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/"
+
+local MusicSound = nil
+local MusicIndex = 0
+local MusicPlaying = false
+local PlayToken = 0
+
+local MusicList = {}
+
+--------------------------------------------------
+-- MUSIC SYSTEM
+--------------------------------------------------
+
+local function StopMusic()
+    MusicPlaying = false
+    PlayToken = PlayToken + 1
+
+    if MusicSound then
+        pcall(function()
+            MusicSound:Stop()
+            MusicSound:Destroy()
+        end)
+        MusicSound = nil
+    end
+end
+
+local function PlayMusic(Index)
+    if not MusicList[Index] then
+        Index = 1
+    end
+
+    if MusicSound then
+        pcall(function()
+            MusicSound:Stop()
+            MusicSound:Destroy()
+        end)
+        MusicSound = nil
+    end
+
+    MusicIndex = Index
+    MusicPlaying = true
+
+    PlayToken = PlayToken + 1
+    local MyToken = PlayToken
+
+    local music = MusicList[Index]
+    local FileName = music.Name .. ".mp3"
+
+    local success, err = pcall(function()
+        if not isfile(FileName) then
+            writefile(FileName, game:HttpGet(music.Url))
+        end
+    end)
+
+    if not success then
+        warn("Lỗi khi tải " .. music.Name .. ": " .. tostring(err))
+
+        if MusicPlaying and MyToken == PlayToken then
+            local NextIndex = Index + 1
+            if NextIndex > #MusicList then
+                NextIndex = 1
+            end
+            PlayMusic(NextIndex)
+        end
+        return
+    end
+
+    local sound = Instance.new("Sound")
+    sound.SoundId = getcustomasset(FileName)
+    sound.Volume = 6
+    sound.Looped = false
+    sound.Parent = game:GetService("SoundService")
+    sound:Play()
+
+    MusicSound = sound
+
+    MusicSound.Ended:Connect(function()
+        if not MusicPlaying then
+            return
+        end
+
+        if MyToken ~= PlayToken then
+            return
+        end
+
+        local NextIndex = MusicIndex + 1
+        if NextIndex > #MusicList then
+            NextIndex = 1
+        end
+
+        PlayMusic(NextIndex)
+    end)
+end
+
+--------------------------------------------------
+-- BUTTON +add PLAYLIST
+--------------------------------------------------
+
+local function AddMusic(Name)
+    local Index = #MusicList + 1
+    local Url = BaseUrl .. Name .. ".mp3"
+
+    MusicList[Index] = {
+        Name = Name,
+        Url = Url
+    }
+
+    SupportTab:CreateButton({
+        Name = Name,
+        Callback = function()
+            if MusicPlaying and MusicIndex == Index then
+                StopMusic()
+                return
+            end
+            PlayMusic(Index)
+        end,
+    })
+end
+
+--------------------------------------------------
+-- list
+-- add name file 
+--------------------------------------------------
+
+AddMusic("RockThatBody")
+AddMusic("IThoughtISawThisFaceToday")
+
+
+-- tab kpop
+local SupportTab = Window:CreateTab("KPop")
 
 local BaseUrl = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/"
 
@@ -478,15 +723,10 @@ AddMusic("CatchCatch")
 AddMusic("Cherish")
 AddMusic("ICONICBYMISTAKE")
 AddMusic("It'sMe")
-AddMusic("RockThatBody")
-AddMusic("IThoughtISawThisFaceToday")
-AddMusic("IllusionarydaytimexTrackmaker")
 AddMusic("SupernovaLove")
 AddMusic("LoveOptions")
 AddMusic("FallenAngel")
 AddMusic("Miniskirt")
-AddMusic("You(=i)")
-AddMusic("StayWithMe9")
 AddMusic("APT")
 AddMusic("DDU-DU DDU-DU")
 AddMusic("KillThisLove")
