@@ -384,8 +384,8 @@ SupportTab:CreateButton({
 })
 
 
---Jpop
-local SupportTab = Window:CreateTab("JPop")
+--illit
+local SupportTab = Window:CreateTab("Illit")
 
 local BaseUrl = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/"
 
@@ -522,7 +522,174 @@ AddMusic("Idol")
 AddMusic("Kiichanthisiswhatfallinginlovefeelslike")
 AddMusic("Orange")
 AddMusic("Rokudenashi")
+AddMusic("CryForMe")
 
+
+--Jpop
+local SupportTab = Window:CreateTab("JPop")
+
+local BaseUrl = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/"
+
+local MusicSound = nil
+local MusicIndex = 0
+local MusicPlaying = false
+local PlayToken = 0
+
+local MusicList = {}
+
+--------------------------------------------------
+-- MUSIC SYSTEM
+--------------------------------------------------
+
+local function StopMusic()
+    MusicPlaying = false
+    PlayToken = PlayToken + 1
+
+    if MusicSound then
+        pcall(function()
+            MusicSound:Stop()
+            MusicSound:Destroy()
+        end)
+        MusicSound = nil
+    end
+end
+
+local function PlayMusic(Index)
+    if not MusicList[Index] then
+        Index = 1
+    end
+
+    if MusicSound then
+        pcall(function()
+            MusicSound:Stop()
+            MusicSound:Destroy()
+        end)
+        MusicSound = nil
+    end
+
+    MusicIndex = Index
+    MusicPlaying = true
+
+    PlayToken = PlayToken + 1
+    local MyToken = PlayToken
+
+    local music = MusicList[Index]
+    local FileName = music.Name .. ".mp3"
+
+    local success, err = pcall(function()
+        if not isfile(FileName) then
+            writefile(FileName, game:HttpGet(music.Url))
+        end
+    end)
+
+    if not success then
+        warn("Lỗi khi tải " .. music.Name .. ": " .. tostring(err))
+
+        if MusicPlaying and MyToken == PlayToken then
+            local NextIndex = Index + 1
+            if NextIndex > #MusicList then
+                NextIndex = 1
+            end
+            PlayMusic(NextIndex)
+        end
+        return
+    end
+
+    local sound = Instance.new("Sound")
+    sound.SoundId = getcustomasset(FileName)
+    sound.Volume = 6
+    sound.Looped = false
+    sound.Parent = game:GetService("SoundService")
+    sound:Play()
+
+    MusicSound = sound
+
+    MusicSound.Ended:Connect(function()
+        if not MusicPlaying then
+            return
+        end
+
+        if MyToken ~= PlayToken then
+            return
+        end
+
+        local NextIndex = MusicIndex + 1
+        if NextIndex > #MusicList then
+            NextIndex = 1
+        end
+
+        PlayMusic(NextIndex)
+    end)
+end
+
+--------------------------------------------------
+-- BUTTON +add PLAYLIST
+--------------------------------------------------
+
+local function AddMusic(Name)
+    local Index = #MusicList + 1
+    local Url = BaseUrl .. Name .. ".mp3"
+
+    MusicList[Index] = {
+        Name = Name,
+        Url = Url
+    }
+
+    SupportTab:CreateButton({
+        Name = Name,
+        Callback = function()
+            if MusicPlaying and MusicIndex == Index then
+                StopMusic()
+                return
+            end
+            PlayMusic(Index)
+        end,
+    })
+end
+
+--------------------------------------------------
+-- list
+-- add name file 
+--------------------------------------------------
+
+AddMusic("allforyouU")
+AddMusic("almondChocolate")
+AddMusic("almondchocolatekoreanveR")
+AddMusic("babyitsbothticktackenglishverfeatavamaxX")
+AddMusic("bamsopoongG")
+AddMusic("billyeongoyangidothedancE")
+AddMusic("bubeE")
+AddMusic("bubeekoreanveR")
+AddMusic("cherishmylovE")
+AddMusic("grwmgetreadywithmE")
+AddMusic("iconicbymistakE")
+AddMusic("igotyourbacK")
+AddMusic("igotyourbackkoreanveR")
+AddMusic("illlikeyouU")
+AddMusic("itsmE")
+AddMusic("iykykifyouknowyouknowW")
+AddMusic("jellyouS")
+AddMusic("jellyousfeatsophiepowerS")
+AddMusic("littleMonster")
+AddMusic("loveolderyouU")
+AddMusic("loveSmile")
+AddMusic("luckygirlsyndromE")
+AddMusic("magneticC")
+AddMusic("mamihlapinatapal")
+AddMusic("midnightFiction")
+AddMusic("myWorld")
+AddMusic("notcuteanymorE")
+AddMusic("notMe")
+AddMusic("oopS")
+AddMusic("pawPaw")
+AddMusic("pimplE")
+AddMusic("secretQuest")
+AddMusic("seeutonighT")
+AddMusic("sundayMorning")
+AddMusic("thelookinyoureyelS")
+AddMusic("ticktacK")
+AddMusic("TokiYoTomare")
+AddMusic("Topping")
 
 
 --usuk
