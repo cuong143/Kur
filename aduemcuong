@@ -318,6 +318,35 @@ SupportTab:CreateButton({
     end,
 })
 
+SupportTab:CreateButton({
+    Name = "Clear Music Cache",
+    Callback = function()
+        StopMusic()
+
+        local Cleared = 0
+        local Failed = 0
+
+        for _, music in ipairs(MusicList) do
+            local FileName = music.Name .. ".mp3"
+
+            if isfile(FileName) then
+                local success, err = pcall(function()
+                    delfile(FileName)
+                end)
+
+                if success then
+                    Cleared = Cleared + 1
+                else
+                    Failed = Failed + 1
+                    warn("Không xoá được " .. FileName .. ": " .. tostring(err))
+                end
+            end
+        end
+
+        print("Đã xoá " .. Cleared .. " file cache, lỗi " .. Failed .. " file.")
+    end,
+})
+
 
 --Jpop
 local SupportTab = Window:CreateTab("JPop")
