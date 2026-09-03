@@ -522,7 +522,6 @@ AddMusic("Idol")
 AddMusic("Kiichanthisiswhatfallinginlovefeelslike")
 AddMusic("Orange")
 AddMusic("Rokudenashi")
-AddMusic("CryForMe")
 
 
 --Illit
@@ -652,30 +651,17 @@ end
 -- add name file 
 --------------------------------------------------
 
-AddMusic("allforyouU")
-AddMusic("almondChocolate")
-AddMusic("almondchocolatekoreanveR")
-AddMusic("babyitsbothticktackenglishverfeatavamaxX")
-AddMusic("bamsopoongG")
-AddMusic("billyeongoyangidothedancE")
 AddMusic("bubeE")
 AddMusic("bubeekoreanveR")
 AddMusic("cherishmylovE")
 AddMusic("grwmgetreadywithmE")
-AddMusic("iconicbymistakE")
 AddMusic("igotyourbacK")
-AddMusic("igotyourbackkoreanveR")
-AddMusic("illlikeyouU")
 AddMusic("itsmE")
-AddMusic("iykykifyouknowyouknowW")
 AddMusic("jellyouS")
 AddMusic("jellyousfeatsophiepowerS")
 AddMusic("littleMonster")
-AddMusic("loveolderyouU")
 AddMusic("loveSmile")
 AddMusic("luckygirlsyndromE")
-AddMusic("magneticC")
-AddMusic("mamihlapinatapal")
 AddMusic("midnightFiction")
 AddMusic("myWorld")
 AddMusic("notcuteanymorE")
@@ -686,10 +672,10 @@ AddMusic("pimplE")
 AddMusic("secretQuest")
 AddMusic("seeutonighT")
 AddMusic("sundayMorning")
-AddMusic("thelookinyoureyelS")
 AddMusic("ticktacK")
 AddMusic("TokiYoTomare")
 AddMusic("Topping")
+AddMusic("magnetiC")
 
 
 --usuk
