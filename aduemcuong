@@ -384,8 +384,8 @@ SupportTab:CreateButton({
 })
 
 
---illit
-local SupportTab = Window:CreateTab("Illit")
+--JPop
+local SupportTab = Window:CreateTab("JPop")
 
 local BaseUrl = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/"
 
@@ -525,8 +525,8 @@ AddMusic("Rokudenashi")
 AddMusic("CryForMe")
 
 
---Jpop
-local SupportTab = Window:CreateTab("JPop")
+--Illit
+local SupportTab = Window:CreateTab("Illit")
 
 local BaseUrl = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/"
 
