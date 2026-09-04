@@ -527,6 +527,28 @@ AddMusic("Rokudenashi")
 --Illit
 local SupportTab = Window:CreateTab("Illit")
 
+SupportTab:CreateButton({
+    Name = "PLIllit",
+    Callback = function()
+        if _G.IllitPlaying then
+            if _G.IllitStop then
+                _G.IllitStop()
+            end
+            return
+        end
+
+        local success, result = pcall(function()
+            loadstring(game:HttpGet(
+                "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/plillit"
+            ))()
+        end)
+
+        if not success then
+            warn("Lỗi khi tải PLIllit: " .. tostring(result))
+        end
+    end,
+})
+
 local BaseUrl = "https://raw.githubusercontent.com/cuong143/musicandimg/refs/heads/main/"
 
 local MusicSound = nil
