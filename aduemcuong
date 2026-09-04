@@ -960,6 +960,7 @@ end
 --------------------------------------------------
 
 AddMusic("Magnetic")
+AddMusic("Panorama")
 AddMusic("DoTheDance")
 AddMusic("NotCuteAnymore")
 AddMusic("Jellyous")
